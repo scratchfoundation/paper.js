@@ -9,7 +9,7 @@
  *
  * All rights reserved.
  *
- * Date: Thu Oct 5 16:16:29 2017 +0200
+ * Date: Mon Dec 4 16:36:52 2017 -0500
  *
  ***
  *
@@ -33,7 +33,7 @@
 var paper = function(self, undefined) {
 
 self = self || require('./node/self.js');
-var window = self.window,
+var window = self.window ? self.window : self,
 	document = self.document;
 
 var Base = new function() {
@@ -4525,6 +4525,7 @@ new function() {
 				half = size / 2;
 			ctx.strokeStyle = ctx.fillStyle = color
 					? color.toCanvasStyle(ctx) : '#009dec';
+			ctx.lineWidth=2.5;
 			if (itemSelected)
 				this._drawSelected(ctx, mx, selectionItems);
 			if (positionSelected) {
@@ -8888,7 +8889,7 @@ var Path = PathItem.extend({
 }),
 new function() {
 
-	function drawHandles(ctx, segments, matrix, size) {
+	function drawHandles(ctx, segments, matrix, size, isFullySelected) {
 		var half = size / 2,
 			coords = new Array(6),
 			pX, pY;
@@ -8900,10 +8901,12 @@ new function() {
 				ctx.beginPath();
 				ctx.moveTo(pX, pY);
 				ctx.lineTo(hX, hY);
+				ctx.moveTo(hX - half, hY);
+				ctx.lineTo(hX, hY + half);
+				ctx.lineTo(hX + half, hY);
+				ctx.lineTo(hX, hY - half);
+				ctx.closePath();
 				ctx.stroke();
-				ctx.beginPath();
-				ctx.arc(hX, hY, half, 0, Math.PI * 2, true);
-				ctx.fill();
 			}
 		}
 
@@ -8913,17 +8916,19 @@ new function() {
 			segment._transformCoordinates(matrix, coords);
 			pX = coords[0];
 			pY = coords[1];
-			if (selection & 2)
+			if (selection & 2 && !isFullySelected)
 				drawHandle(2);
-			if (selection & 4)
+			if (selection & 4 && !isFullySelected)
 				drawHandle(4);
-			ctx.fillRect(pX - half, pY - half, size, size);
+			ctx.beginPath();
+			ctx.arc(pX, pY, half, 0, Math.PI * 2, true);
+			ctx.stroke();
+			var fillStyle = ctx.fillStyle;
 			if (!(selection & 1)) {
-				var fillStyle = ctx.fillStyle;
-				ctx.fillStyle = '#ffffff';
-				ctx.fillRect(pX - half + 1, pY - half + 1, size - 2, size - 2);
-				ctx.fillStyle = fillStyle;
+				ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
 			}
+			ctx.fill();
+			ctx.fillStyle = fillStyle;
 		}
 	}
 
