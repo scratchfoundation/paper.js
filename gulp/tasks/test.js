@@ -13,9 +13,17 @@
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
     qunits = require('gulp-qunits'),
+    runSequence = require('run-sequence');
     webserver = require('gulp-webserver');
 
-gulp.task('test', ['test:phantom', 'test:node']);
+gulp.task('test', function(callback) {
+    runSequence(
+        'build',
+        'test:postbuild'
+    );
+});
+
+gulp.task('test:postbuild', ['test:phantom', 'test:node']);
 
 gulp.task('test:phantom', ['minify:acorn'], function() {
     return gulp.src('index.html', { cwd: 'test' })
