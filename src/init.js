@@ -31,5 +31,5 @@
 // NOTE: We're not modifying the global `self` here. We receive its value passed
 // to the paper.js function scope, and this is the one that is modified here.
 self = self || require('./node/self.js');
-var window = self.window,
+var window = self.window ? self.window : self,
     document = self.document;

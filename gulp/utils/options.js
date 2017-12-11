@@ -34,9 +34,10 @@ if (argv.branch && argv.branch !== options.branch) {
 var version = options.version,
     branch = options.branch;
 
-// If we're not on the master branch, use the branch name as a suffix:
-if (branch !== 'master')
-    options.version += '-' + branch;
+// Take this out for now to reduce changes every build
+// // If we're not on the master branch, use the branch name as a suffix:
+// if (branch !== 'master')
+//     options.version += '-' + branch;
 
 // Allow the removal of the suffix again, as needed by the publish task.
 options.resetVersion = function() {
