@@ -2136,6 +2136,9 @@ new function() { // Scope for drawing
     // performance.
 
     function drawHandles(ctx, segments, matrix, size, isFullySelected) {
+        if (size === 0) {
+            return;
+        }
         var half = size / 2,
             coords = new Array(6),
             pX, pY;
