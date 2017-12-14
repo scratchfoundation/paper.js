@@ -1894,6 +1894,8 @@ new function() { // Injection scope for hit-test functions shared with project
      * @option options.guides {Boolean} hit-test items that have {@link
      *     Item#guide} set to `true`
      * @option options.selected {Boolean} only hit selected items
+     * @option options.hitUnfilledPaths {Boolean} Allow hitting null or alpha 0
+     *     fills for paths
      *
      * @param {Point} point the point where the hit-test should be performed
      * @param {Object} [options={ fill: true, stroke: true, segments: true,
