@@ -2321,7 +2321,8 @@ new function() { // Scope for drawing
             drawSegments(ctx, this, matrix);
             // Now stroke it and draw its handles:
             ctx.stroke();
-            drawHandles(ctx, this._segments, matrix, paper.settings.handleSize);
+            drawHandles(ctx, this._segments, matrix, paper.settings.handleSize,
+                this.isFullySelected());
         }
     };
 },
