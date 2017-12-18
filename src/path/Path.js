@@ -1660,7 +1660,8 @@ var Path = PathItem.extend(/** @lends Path# */{
             join, cap, miterLimit,
             area, loc, res,
             hitStroke = options.stroke && style.hasStroke(),
-            hitFill = options.fill && style.hasFill(),
+            hitFill = options.hitUnfilledPaths
+                ? options.fill : options.fill && style.hasFill(),
             hitCurves = options.curves,
             strokeRadius = hitStroke
                     ? style.getStrokeWidth() / 2
