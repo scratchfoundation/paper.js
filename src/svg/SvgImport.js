@@ -300,10 +300,27 @@ new function() {
             // TODO: Support for these is missing in Paper.js right now
             // rotate: character rotation
             // lengthAdjust:
-            var text = new PointText(getPoint(node).add(
-                    getPoint(node, 'dx', 'dy')));
-            text.setContent(node.textContent.trim() || '');
-            return text;
+
+            // Scratch-specific: Do not use x/y attributes because they break multiline usage.
+            if (node.childElementCount === 0) {
+                var text = new PointText();
+                text.setContent(node.textContent.trim() || '');
+                // Scratch-specific: Scratch2 SVGs are offset by 1 leading vertically.
+                // Scratch3 SVGs use <tspan> method for all text (below)
+                text.translate(0, text._style.getLeading());
+                return text;
+            } else {
+                // Scratch3 SVGs always use <tspan>'s for multiline string support.
+                // Does not support x/y attribute or tspan positioning beyond left justified.
+                var lines = [];
+                for (var i = 0; i < node.children.length; i++) {
+                    var child = node.children[i];
+                    lines.push(child.textContent);
+                }
+                var text = new PointText();
+                text.setContent(lines.join('\n') || '');
+                return text;
+            }
         }
     };
 
