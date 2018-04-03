@@ -293,7 +293,7 @@ var CompoundPath = PathItem.extend(/** @lends CompoundPath# */{
                 // options.class == Path, do not test children for fill, since a
                 // compound path forms one shape.
                 // Also support legacy format `type: 'path'`.
-                options.class === Path || options.type === 'path' ? options
+                options.class === Path || options.type === 'path' || options.hitUnfilledPaths ? options
                     : Base.set({}, options, { fill: false }),
                 viewMatrix);
     },
