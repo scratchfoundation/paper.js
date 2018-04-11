@@ -119,5 +119,10 @@ var PointText = TextItem.extend(/** @lends PointText# */{
                     numLines ? - 0.75 * leading : 0,
                     width, numLines * leading);
         return matrix ? matrix._transformBounds(rect, rect) : rect;
+    },
+
+    _hitTestSelf: function(point, options) {
+        if (options.fill && (this.hasFill() || options.hitUnfilledPaths) && this._contains(point))
+            return new HitResult('fill', this);
     }
 });
