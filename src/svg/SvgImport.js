@@ -302,23 +302,39 @@ new function() {
             // lengthAdjust:
 
             // Scratch-specific: Do not use x/y attributes because they break multiline usage.
+            var fontSize = parseFloat(node.getAttribute("font-size"));
             if (node.childElementCount === 0) {
                 var text = new PointText();
                 text.setContent(node.textContent.trim() || '');
                 // Scratch-specific: Scratch2 SVGs are offset by 1 leading vertically.
                 // Scratch3 SVGs use <tspan> method for all text (below)
                 text.translate(0, text._style.getLeading());
+                if (!isNaN(fontSize)) text.setFontSize(fontSize);
                 return text;
             } else {
                 // Scratch3 SVGs always use <tspan>'s for multiline string support.
                 // Does not support x/y attribute or tspan positioning beyond left justified.
                 var lines = [];
+                var spacing = 1.2;
                 for (var i = 0; i < node.children.length; i++) {
                     var child = node.children[i];
                     lines.push(child.textContent);
+                    var dyString = child.getAttribute('dy');
+                    if (dyString) {
+                        var dy = parseFloat(dyString);
+                        if (!isNaN(dy)) {
+                            if (dyString.endsWith('em')) {
+                                spacing = dy;
+                            } else if (dyString.endsWith('px') && !isNaN(fontSize)) {
+                                spacing = dy / fontSize;
+                            }
+                        }
+                    }
                 }
                 var text = new PointText();
+                if (!isNaN(fontSize)) text.setFontSize(fontSize);
                 text.setContent(lines.join('\n') || '');
+                text.setLeading(text.fontSize * spacing);
                 return text;
             }
         }

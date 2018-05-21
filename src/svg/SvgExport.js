@@ -257,12 +257,13 @@ new function() {
         // because they break <tspan> mutliline formatting (below)
         var node = SvgElement.create('text', getTransform(item._matrix, false),
                 formatter);
+        node.setAttribute('font-size', item.fontSize);
         for (var i = 0; i < item._lines.length; i++) {
             // Scratch-specific: Use <tspan> for multiline text,
             // right now only supports left justified (x=0)
             var tspanNode = SvgElement.create('tspan', {
                 x: '0',
-                dy: i === 0 ? '0' : item._style.getLeading() + 'px'
+                dy: i === 0 ? '0' : item.getLeading() + 'px'
             }, formatter);
             tspanNode.textContent = item._lines[i];
             node.appendChild(tspanNode);
