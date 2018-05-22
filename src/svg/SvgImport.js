@@ -303,6 +303,7 @@ new function() {
 
             // Scratch-specific: Do not use x/y attributes because they break multiline usage.
             var fontSize = parseFloat(node.getAttribute("font-size"));
+            var alignmentBaseline = node.getAttribute("alignment-baseline");
             if (node.childElementCount === 0) {
                 var text = new PointText();
                 text.setContent(node.textContent.trim() || '');
@@ -333,8 +334,12 @@ new function() {
                 }
                 var text = new PointText();
                 if (!isNaN(fontSize)) text.setFontSize(fontSize);
-                text.setContent(lines.join('\n') || '');
                 text.setLeading(text.fontSize * spacing);
+                if (alignmentBaseline === 'text-before-edge') {
+                    text.setContent(' '); // No content results in 0 height
+                    text.translate(0, text.bounds.height);
+                }
+                text.setContent(lines.join('\n') || '');
                 return text;
             }
         }
