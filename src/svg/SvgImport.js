@@ -339,7 +339,7 @@ new function() {
                     text.setContent(' '); // No content results in 0 height
                     text.translate(0, text.bounds.height);
                 }
-                text.setContent(lines.join('\n') || '');
+                text.setContent(lines.join('\n'));
                 return text;
             }
         }
