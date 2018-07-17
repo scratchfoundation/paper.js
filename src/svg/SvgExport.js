@@ -194,7 +194,7 @@ new function() {
         return SvgElement.create('use', attrs, formatter);
     }
 
-    function exportGradient(color) {
+    function exportGradient(color, item) {
         // NOTE: As long as the fillTransform attribute is not implemented,
         // we need to create a separate gradient object for each gradient,
         // even when they share the same gradient definition.
@@ -226,6 +226,13 @@ new function() {
                     y2: destination.y
                 };
             }
+            // Scratch-specific: apply inverse of item transform for text elements
+            // because they use transform instead of x/y.
+            if (item instanceof paper.PointText) {
+                attrs.gradientTransform = getTransform(
+                    item._matrix.clone().invert(), false, formatter).transform;
+            }
+
             attrs.gradientUnits = 'userSpaceOnUse';
             gradientNode = SvgElement.create((radial ? 'radial' : 'linear')
                     + 'Gradient', attrs, formatter);
@@ -298,7 +305,10 @@ new function() {
                 value = item[get]();
             if (entry.exportFilter
                     ? entry.exportFilter(item, value)
-                    : !parent || !Base.equals(parent[get](), value)) {
+                    : !parent || !Base.equals(parent[get](), value) ||
+                    // Scratch-specific: always apply styles to text elements to
+                    // because gradients must be specified to avoid transform problems.
+                      item instanceof paper.PointText) {
                 if (type === 'color' && value != null) {
                     // Support for css-style rgba() values is not in SVG 1.1, so
                     // separate the alpha value of colors with alpha into the
