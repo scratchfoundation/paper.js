@@ -443,10 +443,10 @@ var Raster = Item.extend(/** @lends Raster# */{
     getSubCanvas: function(/* rect */) {
         var rect = Rectangle.read(arguments),
             ctx = CanvasProvider.getContext(rect.getSize());
-        const clippedStartX = Math.max(0, rect.x);
-        const clippedStartY = Math.max(0, rect.y);
-        const clippedEndX = Math.min(this.getCanvas().width, rect.x + rect.width);
-        const clippedEndY = Math.min(this.getCanvas().height, rect.y + rect.height);
+        var clippedStartX = Math.max(0, rect.x);
+        var clippedStartY = Math.max(0, rect.y);
+        var clippedEndX = Math.min(this.getCanvas().width, rect.x + rect.width);
+        var clippedEndY = Math.min(this.getCanvas().height, rect.y + rect.height);
         ctx.drawImage(this.getCanvas(),
             clippedStartX, clippedStartY,
             clippedEndX - clippedStartX, clippedEndY - clippedStartY,
