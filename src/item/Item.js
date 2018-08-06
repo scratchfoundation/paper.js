@@ -1666,6 +1666,8 @@ new function() { // Injection scope for various item event handlers
      * @param {Boolean} [insert=true] specifies whether the raster should be
      *     inserted into the scene graph. When set to `true`, it is inserted
      *     above the original
+     * @param {Rectangle} [boundRect] bounds within which to rasterize. Defaults
+     *     to stroke bounds.
      * @return {Raster} the newly created raster item
      *
      * @example {@paperscript}
@@ -1686,9 +1688,9 @@ new function() { // Injection scope for various item event handlers
      * circle.scale(5);
      * raster.scale(5);
      */
-    rasterize: function(resolution, insert) {
+    rasterize: function(resolution, insert, boundRect) {
         // TODO: Switch to options object for more descriptive call signature.
-        var bounds = this.getStrokeBounds(),
+        var bounds = boundRect ? boundRect : this.getStrokeBounds(),
             scale = (resolution || this.getView().getResolution()) / 72,
             // Floor top-left corner and ceil bottom-right corner, to never
             // blur or cut pixels.
@@ -1700,6 +1702,7 @@ new function() { // Injection scope for various item event handlers
             var canvas = CanvasProvider.getCanvas(size.multiply(scale)),
                 ctx = canvas.getContext('2d'),
                 matrix = new Matrix().scale(scale).translate(topLeft.negate());
+            ctx.imageSmoothingEnabled = false;
             ctx.save();
             matrix.applyToContext(ctx);
             // See Project#draw() for an explanation of new Base()
