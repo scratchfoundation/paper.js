@@ -103,24 +103,70 @@ var PointText = TextItem.extend(/** @lends PointText# */{
     },
 
     _getBounds: function(matrix, options) {
-        var style = this._style,
-            lines = this._lines,
-            numLines = lines.length,
-            justification = style.getJustification(),
-            leading = style.getLeading(),
-            width = this.getView().getTextWidth(style.getFontStyle(), lines),
-            x = 0;
-        // Adjust for different justifications.
-        if (justification !== 'left')
-            x -= width / (justification === 'center' ? 2: 1);
-        // Until we don't have baseline measuring, assume 1 / 4 leading as a
-        // rough guess:
-        var rect = new Rectangle(x,
-                    numLines ? - 0.75 * leading : 0,
-                    width, numLines * leading);
+        var rect = this._getTextSize();
         return matrix ? matrix._transformBounds(rect, rect) : rect;
     },
+    _getTextSize () {
+        // Return cached measurement if any
+        if (!this._project._textSizeCache) {
+            this._project._textSizeCache = {};
+        }
+        if (this._project._textSizeCache[this.content]) return this._project._textSizeCache[this.content];
 
+        var numLines = this._lines.length;
+        var leading = this._style.getLeading();
+
+        // Create SVG dom element from text
+        var svg = SvgElement.create('svg', {
+                    version: '1.1',
+                    xmlns: SvgElement.svg
+                });
+        var node = SvgElement.create('text');
+        node.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve')
+        svg.appendChild(node);
+        for (var i = 0; i < numLines; i++) {
+            var tspanNode = SvgElement.create('tspan', {
+                x: '0',
+                dy: i === 0 ? '0' : leading + 'px'
+            });
+            tspanNode.textContent = this._lines[i];
+            node.appendChild(tspanNode);
+        }
+
+        // Append to dom
+        var element = document.createElement('span');
+        element.style.visibility = ('hidden');
+        element.style.whiteSpace = 'pre';
+        element.style.fontSize = `${this.fontSize}px`;
+        element.style.fontFamily = this.font;
+        element.style.lineHeight = this.leading / this.fontSize;
+
+        // Measure bbox
+        var bbox;
+        try {
+            element.appendChild(svg);
+            // Is element width available before appending?
+            document.body.appendChild(element);
+            // Take the bounding box.
+            bbox = svg.getBBox();
+        } finally {
+            // Always destroy the element, even if, for example, getBBox throws.
+            document.body.removeChild(element);
+        }
+
+        // Enlarge the bbox from the largest found stroke width
+        // This may have false-positives, but at least the bbox will always
+        // contain the full graphic including strokes.
+        var halfStrokeWidth = this.strokeWidth / 2;
+        var width = bbox.width + (halfStrokeWidth * 2);
+        var height = bbox.height + (halfStrokeWidth * 2);
+        var x = bbox.x - halfStrokeWidth;
+        var y = bbox.y - halfStrokeWidth;
+
+        // Add 1 to give space for text cursor
+        this._project._textSizeCache[this.content] = new Rectangle(x, y, width + 1, Math.max(height, numLines * leading));
+        return this._project._textSizeCache[this.content];
+    },
     _hitTestSelf: function(point, options) {
         if (options.fill && (this.hasFill() || options.hitUnfilledPaths) && this._contains(point))
             return new HitResult('fill', this);

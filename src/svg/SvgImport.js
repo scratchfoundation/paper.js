@@ -140,6 +140,7 @@ new function() {
     }
 
     function importGradient(node, type) {
+        debugger;
         var id = (getValue(node, 'href', true) || '').substring(1),
             radial = type === 'radialgradient',
             gradient;
