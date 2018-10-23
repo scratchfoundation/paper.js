@@ -525,11 +525,9 @@ var View = Base.extend(Emitter, /** @lends View# */{
      * @see #getScaling()
      */
     getZoom: function() {
-        var decomposed = this._decompose(),
-            scaling = decomposed && decomposed.scaling;
-        // Use average since it can be non-uniform, and return 0 when it can't
-        // be decomposed.
-        return scaling ? (scaling.x + scaling.y) / 2 : 0;
+        var scaling = this._decompose().scaling;
+        // Use average since it can be non-uniform.
+        return (scaling.x + scaling.y) / 2;
     },
 
     setZoom: function(zoom) {
@@ -545,8 +543,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      * @type Number
      */
     getRotation: function() {
-        var decomposed = this._decompose();
-        return decomposed && decomposed.rotation;
+        return this._decompose().rotation;
     },
 
     setRotation: function(rotation) {
@@ -565,11 +562,8 @@ var View = Base.extend(Emitter, /** @lends View# */{
      * @see #getZoom()
      */
     getScaling: function() {
-        var decomposed = this._decompose(),
-            scaling = decomposed && decomposed.scaling;
-        return scaling
-                ? new LinkedPoint(scaling.x, scaling.y, this, 'setScaling')
-                : undefined;
+        var scaling = this._decompose().scaling;
+        return new LinkedPoint(scaling.x, scaling.y, this, 'setScaling');
     },
 
     setScaling: function(/* scaling */) {
@@ -1271,11 +1265,12 @@ new function() { // Injection scope for event handling on the browser
                     point, prevPoint)
             // Next handle the hit-item, if it's different from the drag-item
             // and not a descendant of it (in which case it would already have
-            // received an event in the call above).
+            // received an event in the call above). Translate mousedrag to
+            // mousemove, since drag is handled above.
             || hitItem && hitItem !== dragItem
                 && !hitItem.isDescendant(dragItem)
-                && emitMouseEvent(hitItem, null, type, event, point, prevPoint,
-                    dragItem)
+                && emitMouseEvent(hitItem, null, type === 'mousedrag' ?
+                    'mousemove' : type, event, point, prevPoint, dragItem)
             // Lastly handle the mouse events on the view, if we're still here.
             || emitMouseEvent(view, dragItem || hitItem || view, type, event,
                     point, prevPoint));
@@ -1440,8 +1435,16 @@ new function() { // Injection scope for event handling on the browser
             //   which can call `preventDefault()` explicitly or return `false`.
             // - If this is a unhandled mousedown event, but the view or tools
             //   respond to mouseup.
-            if (called && !mouse.move || mouse.down && responds('mouseup'))
+            //
+            // Some events are not cancelable anyway (like during a scroll
+            // inertia on mobile) so trying to prevent default in those case
+            // would result in no effect and an error.
+            if (
+                event.cancelable !== false
+                && (called && !mouse.move || mouse.down && responds('mouseup'))
+            ) {
                 event.preventDefault();
+            }
         },
 
         /**
@@ -1490,7 +1493,20 @@ new function() { // Injection scope for event handling on the browser
              * Loops through all views and sets the focus on the first
              * active one.
              */
-            updateFocus: updateFocus
+            updateFocus: updateFocus,
+
+            /**
+             * Clear all events handling state informations. Made for testing
+             * purpose, to have a way to start with a fresh state before each
+             * test.
+             * @private
+             */
+            _resetState: function() {
+                dragging = mouseDown = called = wasInView = false;
+                prevFocus = tempFocus = overView = downPoint = lastPoint =
+                    downItem = overItem = dragItem = clickItem = clickTime =
+                    dblClick = null;
+            }
         }
     };
 });

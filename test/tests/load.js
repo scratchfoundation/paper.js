@@ -62,3 +62,8 @@
 /*#*/ include('SvgExport.js');
 
 /*#*/ include('Numerical.js');
+
+// There is no need to test interactions in node context.
+if (!isNode) {
+    /*#*/ include('Interactions.js');
+}
