@@ -101,18 +101,31 @@ var PointText = TextItem.extend(/** @lends PointText# */{
             ctx.translate(0, leading);
         }
     },
-
     _getBounds: function(matrix, options) {
-        var rect = this._getTextSize();
+        var rect = options.forSvgExport ? this._getVisibleTextSize() : this._getMeasuredTextSize();
+        console.log(rect);
         return matrix ? matrix._transformBounds(rect, rect) : rect;
     },
-    _getTextSize () {
-        // Return cached measurement if any
-        if (!this._project._textSizeCache) {
-            this._project._textSizeCache = {};
-        }
-        if (this._project._textSizeCache[this.content]) return this._project._textSizeCache[this.content];
-
+    _getMeasuredTextSize () {
+        console.log("get measured text size");
+        var style = this._style,
+            lines = this._lines,
+            numLines = lines.length,
+            justification = style.getJustification(),
+            leading = style.getLeading(),
+            width = this.getView().getTextWidth(style.getFontStyle(), lines),
+            x = 0;
+        // Adjust for different justifications.
+        if (justification !== 'left')
+            x -= width / (justification === 'center' ? 2: 1);
+        // Until we don't have baseline measuring, assume 1 / 4 leading as a
+        // rough guess:
+        return new Rectangle(x,
+                    numLines ? - 0.75 * leading : 0,
+                    width, numLines * leading);
+    },
+    _getVisibleTextSize () {
+        console.log("get visible text size");
         var numLines = this._lines.length;
         var leading = this._style.getLeading();
 
@@ -164,8 +177,7 @@ var PointText = TextItem.extend(/** @lends PointText# */{
         var y = bbox.y - halfStrokeWidth;
 
         // Add 1 to give space for text cursor
-        this._project._textSizeCache[this.content] = new Rectangle(x, y, width + 1, Math.max(height, numLines * leading));
-        return this._project._textSizeCache[this.content];
+        return new Rectangle(x, y, width + 1, Math.max(height, numLines * leading));
     },
     _hitTestSelf: function(point, options) {
         if (options.fill && (this.hasFill() || options.hitUnfilledPaths) && this._contains(point))

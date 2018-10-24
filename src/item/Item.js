@@ -835,7 +835,8 @@ new function() { // Injection scope for various item event handlers
 }, Base.each({ // Produce getters for bounds properties:
         getStrokeBounds: { stroke: true },
         getHandleBounds: { handle: true },
-        getInternalBounds: { internal: true }
+        getInternalBounds: { internal: true },
+        getVisibleBounds: { stroke: true, forSvgExport: true },
     },
     function(options, key) {
         this[key] = function(matrix) {
