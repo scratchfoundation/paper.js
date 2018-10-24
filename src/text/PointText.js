@@ -105,7 +105,7 @@ var PointText = TextItem.extend(/** @lends PointText# */{
         var rect = options.drawnTextBounds ? this._getDrawnTextSize() : this._getMeasuredTextSize();
         return matrix ? matrix._transformBounds(rect, rect) : rect;
     },
-    _getMeasuredTextSize () {
+    _getMeasuredTextSize: function() {
         var style = this._style,
             lines = this._lines,
             numLines = lines.length,
@@ -122,7 +122,7 @@ var PointText = TextItem.extend(/** @lends PointText# */{
                     numLines ? - 0.75 * leading : 0,
                     width, numLines * leading);
     },
-    _getDrawnTextSize () {
+    _getDrawnTextSize: function() {
         var numLines = this._lines.length;
         var leading = this._style.getLeading();
 
@@ -132,7 +132,7 @@ var PointText = TextItem.extend(/** @lends PointText# */{
                     xmlns: SvgElement.svg
                 });
         var node = SvgElement.create('text');
-        node.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve')
+        node.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
         svg.appendChild(node);
         for (var i = 0; i < numLines; i++) {
             var tspanNode = SvgElement.create('tspan', {
@@ -147,7 +147,7 @@ var PointText = TextItem.extend(/** @lends PointText# */{
         var element = document.createElement('span');
         element.style.visibility = ('hidden');
         element.style.whiteSpace = 'pre';
-        element.style.fontSize = `${this.fontSize}px`;
+        element.style.fontSize = this.fontSize + 'px';
         element.style.fontFamily = this.font;
         element.style.lineHeight = this.leading / this.fontSize;
 
