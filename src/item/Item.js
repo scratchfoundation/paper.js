@@ -836,7 +836,8 @@ new function() { // Injection scope for various item event handlers
         getStrokeBounds: { stroke: true },
         getHandleBounds: { handle: true },
         getInternalBounds: { internal: true },
-        getVisibleBounds: { stroke: true, forSvgExport: true },
+        // Includes text overhangs
+        getDrawnBounds: { stroke: true, drawnTextBounds: true },
     },
     function(options, key) {
         this[key] = function(matrix) {
@@ -932,6 +933,7 @@ new function() { // Injection scope for various item event handlers
         return [
             options.stroke ? 1 : 0,
             options.handle ? 1 : 0,
+            options.drawnTextBounds? 1 : 0,
             internal ? 1 : 0
         ].join('');
     },

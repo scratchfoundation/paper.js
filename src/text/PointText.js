@@ -102,12 +102,10 @@ var PointText = TextItem.extend(/** @lends PointText# */{
         }
     },
     _getBounds: function(matrix, options) {
-        var rect = options.forSvgExport ? this._getVisibleTextSize() : this._getMeasuredTextSize();
-        console.log(rect);
+        var rect = options.drawnTextBounds ? this._getDrawnTextSize() : this._getMeasuredTextSize();
         return matrix ? matrix._transformBounds(rect, rect) : rect;
     },
     _getMeasuredTextSize () {
-        console.log("get measured text size");
         var style = this._style,
             lines = this._lines,
             numLines = lines.length,
@@ -124,8 +122,7 @@ var PointText = TextItem.extend(/** @lends PointText# */{
                     numLines ? - 0.75 * leading : 0,
                     width, numLines * leading);
     },
-    _getVisibleTextSize () {
-        console.log("get visible text size");
+    _getDrawnTextSize () {
         var numLines = this._lines.length;
         var leading = this._style.getLeading();
 
