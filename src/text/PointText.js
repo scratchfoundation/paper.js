@@ -101,10 +101,12 @@ var PointText = TextItem.extend(/** @lends PointText# */{
             ctx.translate(0, leading);
         }
     },
+
     _getBounds: function(matrix, options) {
         var rect = options.drawnTextBounds ? this._getDrawnTextSize() : this._getMeasuredTextSize();
         return matrix ? matrix._transformBounds(rect, rect) : rect;
     },
+
     _getMeasuredTextSize: function() {
         var style = this._style,
             lines = this._lines,
@@ -122,6 +124,7 @@ var PointText = TextItem.extend(/** @lends PointText# */{
                     numLines ? - 0.75 * leading : 0,
                     width, numLines * leading);
     },
+
     _getDrawnTextSize: function() {
         var style = this._style;
         var lines = this._lines;
@@ -185,6 +188,7 @@ var PointText = TextItem.extend(/** @lends PointText# */{
         // Add 1 to give space for text cursor
         return new Rectangle(x, y, width + 1, Math.max(height, numLines * leading));
     },
+
     _hitTestSelf: function(point, options) {
         if (options.fill && (this.hasFill() || options.hitUnfilledPaths) && this._contains(point))
             return new HitResult('fill', this);
