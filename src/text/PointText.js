@@ -123,8 +123,11 @@ var PointText = TextItem.extend(/** @lends PointText# */{
                     width, numLines * leading);
     },
     _getDrawnTextSize: function() {
-        var numLines = this._lines.length;
-        var leading = this._style.getLeading();
+        var style = this._style;
+        var lines = this._lines;
+        var numLines = lines.length;
+        var leading = style.getLeading();
+        var justification = style.getJustification();
 
         // Create SVG dom element from text
         var svg = SvgElement.create('svg', {
@@ -172,6 +175,12 @@ var PointText = TextItem.extend(/** @lends PointText# */{
         var height = bbox.height + (halfStrokeWidth * 2);
         var x = bbox.x - halfStrokeWidth;
         var y = bbox.y - halfStrokeWidth;
+
+        // Adjust for different justifications.
+        if (justification !== 'left') {
+            var eltWidth = this.getView().getTextWidth(style.getFontStyle(), lines);
+            x -= eltWidth / (justification === 'center' ? 2: 1);
+        }
 
         // Add 1 to give space for text cursor
         return new Rectangle(x, y, width + 1, Math.max(height, numLines * leading));
