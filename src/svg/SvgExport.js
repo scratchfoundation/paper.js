@@ -438,7 +438,7 @@ new function() {
                 rect = bounds === 'view'
                     ? new Rectangle([0, 0], view.getViewSize())
                     : bounds === 'content'
-                        ? Item._getBounds(children, matrix, { stroke: true })
+                        ? Item._getBounds(children, matrix, { stroke: true, drawnTextBounds: true })
                             .rect
                         : Rectangle.read([bounds], 0, { readNull: true }),
                 attrs = {
