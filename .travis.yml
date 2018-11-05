@@ -51,6 +51,7 @@ before_deploy:
 - git config --global user.name $(git log --pretty=format:"%an" -n1)
 deploy:
 - provider: npm
+  node_js: 8
   on:
     branch: develop
   skip_cleanup: true
