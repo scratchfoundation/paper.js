@@ -30,7 +30,7 @@ var Raster = Item.extend(/** @lends Raster# */{
     },
     // Prioritize `crossOrigin` over `source`:
     _prioritize: ['crossOrigin'],
-    _smoothing: true,
+    _smoothing: false,
 
     // TODO: Implement type, width, height.
     // TODO: Have SymbolItem & Raster inherit from a shared class?
@@ -426,7 +426,7 @@ var Raster = Item.extend(/** @lends Raster# */{
      *
      * @bean
      * @type Boolean
-     * @default true
+     * @default false
      *
      * @example {@paperscript}
      * var raster = new Raster({
