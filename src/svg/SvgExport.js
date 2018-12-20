@@ -265,6 +265,7 @@ new function() {
         var node = SvgElement.create('text', getTransform(item._matrix, false),
                 formatter);
         node.setAttribute('font-size', item.fontSize);
+        node.setAttribute('xml:space', 'preserve');
         for (var i = 0; i < item._lines.length; i++) {
             // Scratch-specific: Use <tspan> for multiline text,
             // right now only supports left justified (x=0)
@@ -272,7 +273,7 @@ new function() {
                 x: '0',
                 dy: i === 0 ? '0' : item.getLeading() + 'px'
             }, formatter);
-            tspanNode.textContent = item._lines[i];
+            tspanNode.textContent = item._lines[i] ? item._lines[i] : ' ';
             node.appendChild(tspanNode);
         }
         return node;
