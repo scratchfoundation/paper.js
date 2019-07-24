@@ -316,8 +316,8 @@ new function() {
                 // Does not support x/y attribute or tspan positioning beyond left justified.
                 var lines = [];
                 var spacing = 1.2;
-                for (var i = 0; i < node.childNodes.length; i++) {
-                    var child = node.childNodes[i];
+                for (var i = 0; i < node.children.length; i++) {
+                    var child = node.children[i];
                     lines.push(child.textContent);
                     var dyString = child.getAttribute('dy');
                     if (dyString) {
