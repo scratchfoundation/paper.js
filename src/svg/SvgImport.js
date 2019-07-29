@@ -318,6 +318,10 @@ new function() {
                 var spacing = 1.2;
                 for (var i = 0; i < node.childNodes.length; i++) {
                     var child = node.childNodes[i];
+                    // node.childNodes includes plaintext as well as elements.
+                    // By checking for getAttribute, we ignore plaintext
+                    // (node.children gets only elements but is not supported on Safari)
+                    if (!child.getAttribute) continue;
                     lines.push(child.textContent);
                     var dyString = child.getAttribute('dy');
                     if (dyString) {
