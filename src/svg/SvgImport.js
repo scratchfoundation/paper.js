@@ -531,7 +531,14 @@ new function() {
                 if (matrix)
                     group.transform(matrix);
             }
-        }
+        },
+
+        'fill-rule': function(item, value) {
+            // Sometimes, the fill-rule attribute will be set to "none" due to a paper.js bug.
+            // This is coerced into a `null`. A null `fillRule` will cause certain operaions to error out.
+            // So, only set the fill rule if it's one of the two valid options: "evenodd" and "nonzero".
+			if (value === 'evenodd' || value === 'nonzero') item.fillRule = value;
+		}
     });
 
     function getAttribute(node, name, styles) {
