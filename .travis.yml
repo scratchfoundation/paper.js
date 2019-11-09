@@ -4,7 +4,7 @@ node_js:
 # Stable version is temporarily disabled due to a bug in resemblejs package with
 # node v12 (https://github.com/orgs/paperjs/teams/contributors/discussions/12).
 # - stable
-- 11
+# - 11
 - 10
 - 8
 sudo: false
