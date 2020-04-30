@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2019, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & https://puckey.studio/
+ * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
+ * http://scratchdisk.com/ & http://jonathanpuckey.com/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -18,7 +18,6 @@
  * @extends Item
  */
 var Raster = Item.extend(/** @lends Raster# */{
-}, /** @lends Raster# */{
     _class: 'Raster',
     _applyMatrix: false,
     _canApplyMatrix: false,
@@ -32,19 +31,15 @@ var Raster = Item.extend(/** @lends Raster# */{
     // Prioritize `crossOrigin` over `source`:
     _prioritize: ['crossOrigin'],
     _smoothing: false,
-    // Enforce creation of beans, as bean getters have hidden parameters.
-    // See  #getContext(_change) below.
-    beans: true,
 
     // TODO: Implement type, width, height.
     // TODO: Have SymbolItem & Raster inherit from a shared class?
     /**
      * Creates a new raster item from the passed argument, and places it in the
-     * active layer. `source` can either be a DOM Image, a Canvas, or a string
+     * active layer. `object` can either be a DOM Image, a Canvas, or a string
      * describing the URL to load the image from, or the ID of a DOM element to
      * get the image from (either a DOM Image or a Canvas).
      *
-     * @name Raster#initialize
      * @param {HTMLImageElement|HTMLCanvasElement|String} [source] the source of
      *     the raster
      * @param {Point} [position] the center position at which the raster item is
@@ -82,64 +77,22 @@ var Raster = Item.extend(/** @lends Raster# */{
      * raster.scale(0.5);
      * raster.rotate(10);
      */
-    /**
-     * Creates a new empty raster of the given size, and places it in the
-     * active layer.
-     *
-     * @name Raster#initialize
-     * @param {Size} size the size of the raster
-     * @param {Point} [position] the center position at which the raster item is
-     *     placed
-     *
-     * @example {@paperscript height=150}
-     * // Creating an empty raster and fill it with random pixels:
-     * var width = 100;
-     * var height = 100;
-     *
-     * // Create an empty raster placed at view center.
-     * var raster = new Raster(new Size(width, height), view.center);
-     *
-     * // For all of its pixels...
-     * for (var i = 0; i < width; i++) {
-     *     for (var j = 0; j < height; j++) {
-     *         // ...set a random color.
-     *         raster.setPixel(i, j, Color.random());
-     *     }
-     * }
-     */
-    initialize: function Raster(source, position) {
-        // Support three forms of item initialization:
-        // - One object literal describing all the different properties.
-        // - An image (Image|Canvas|String) and an optional position (Point).
-        // - A size (Size) describing the canvas that will be  created and an
-        //   optional position (Point).
+    initialize: function Raster(object, position) {
+        // Support two forms of item initialization: Passing one object literal
+        // describing all the different properties to be set, or an image
+        // (object) and a point where it should be placed (point).
         // If _initialize can set properties through object literal, we're done.
-        // Otherwise we need to check the type of object:       var image,
-        if (!this._initialize(source,
-                position !== undefined && Point.read(arguments))) {
-            var image,
-                type = typeof source,
-                object = type === 'string'
-                    ? document.getElementById(source)
-                    : type  === 'object'
-                        ? source
-                        : null;
-            if (object && object !== Item.NO_INSERT) {
-                if (object.getContent || object.naturalHeight != null) {
-                    image = object;
-                } else if (object) {
-                    // See if the arguments describe the raster size:
-                    var size = Size.read(arguments);
-                    if (!size.isZero()) {
-                        image = CanvasProvider.getCanvas(size);
-                    }
-                }
-            }
+        // Otherwise we need to check the type of object:
+        if (!this._initialize(object,
+                position !== undefined && Point.read(arguments, 1))) {
+            // object can be an image, canvas, URL or DOM-ID:
+            var image = typeof object === 'string'
+                    ? document.getElementById(object) : object;
             if (image) {
                 // #setImage() handles both canvas and image types.
                 this.setImage(image);
             } else {
-                this.setSource(source);
+                this.setSource(object);
             }
         }
         if (!this._size) {
@@ -352,7 +305,7 @@ var Raster = Item.extend(/** @lends Raster# */{
      * case `null` is returned instead.
      *
      * @bean
-     * @type HTMLCanvasElement
+     * @type HTMLCanvasELement
      */
     getCanvas: function() {
         if (!this._canvas) {
@@ -377,15 +330,15 @@ var Raster = Item.extend(/** @lends Raster# */{
      * The Canvas 2D drawing context of the raster.
      *
      * @bean
-     * @type CanvasRenderingContext2D
+     * @type Context
      */
-    getContext: function(_change) {
+    getContext: function(modify) {
         if (!this._context)
             this._context = this.getCanvas().getContext('2d');
         // Support a hidden parameter that indicates if the context will be used
-        // to change the Raster object. We can notify such changes ahead since
+        // to modify the Raster object. We can notify such changes ahead since
         // they are only used afterwards for redrawing.
-        if (_change) {
+        if (modify) {
             // Also set _image to null since the Raster stops representing it.
             // NOTE: This should theoretically be in our own _changed() handler
             // for ChangeFlag.PIXELS, but since it's only happening in one place
@@ -433,11 +386,7 @@ var Raster = Item.extend(/** @lends Raster# */{
             crossOrigin = this._crossOrigin;
         if (crossOrigin)
             image.crossOrigin = crossOrigin;
-        // Prevent setting image source to `null`, as this isn't supported by
-        // browsers, and it would actually throw exceptions in JSDOM.
-        // TODO: Look into fixing this bug in JSDOM.
-        if (src)
-            image.src = src;
+        image.src = src;
         this.setImage(image);
     },
 
@@ -514,7 +463,7 @@ var Raster = Item.extend(/** @lends Raster# */{
      * @param {Rectangle} rect the boundaries of the sub image in pixel
      * coordinates
      *
-     * @return {HTMLCanvasElement} the sub image as a Canvas object
+     * @return {HTMLCanvasELement} the sub image as a Canvas object
      */
     getSubCanvas: function(/* rect */) {
         var rect = Rectangle.read(arguments),
@@ -570,7 +519,7 @@ var Raster = Item.extend(/** @lends Raster# */{
     /**
      * Draws an image on the raster.
      *
-     * @param {HTMLImageElement|HTMLCanvasElement} image
+     * @param {HTMLImageELement|HTMLCanvasELement} image
      * @param {Point} point the offset of the image as a point in pixel
      * coordinates
      */
@@ -665,8 +614,8 @@ var Raster = Item.extend(/** @lends Raster# */{
      *
      * @name Raster#getPixel
      * @function
-     * @param {Number} x the x offset of the pixel in pixel coordinates
-     * @param {Number} y the y offset of the pixel in pixel coordinates
+     * @param x the x offset of the pixel in pixel coordinates
+     * @param y the y offset of the pixel in pixel coordinates
      * @return {Color} the color of the pixel
      */
     /**
@@ -674,8 +623,7 @@ var Raster = Item.extend(/** @lends Raster# */{
      *
      * @name Raster#getPixel
      * @function
-     * @param {Point} point the offset of the pixel as a point in pixel
-     *     coordinates
+     * @param point the offset of the pixel as a point in pixel coordinates
      * @return {Color} the color of the pixel
      */
     getPixel: function(/* point */) {
@@ -691,18 +639,17 @@ var Raster = Item.extend(/** @lends Raster# */{
      *
      * @name Raster#setPixel
      * @function
-     * @param {Number} x the x offset of the pixel in pixel coordinates
-     * @param {Number} y the y offset of the pixel in pixel coordinates
-     * @param {Color} color the color that the pixel will be set to
+     * @param x the x offset of the pixel in pixel coordinates
+     * @param y the y offset of the pixel in pixel coordinates
+     * @param color the color that the pixel will be set to
      */
     /**
      * Sets the color of the specified pixel to the specified color.
      *
      * @name Raster#setPixel
      * @function
-     * @param {Point} point the offset of the pixel as a point in pixel
-     *     coordinates
-     * @param {Color} color the color that the pixel will be set to
+     * @param point the offset of the pixel as a point in pixel coordinates
+     * @param color the color that the pixel will be set to
      */
     setPixel: function(/* point, color */) {
         var point = Point.read(arguments),
@@ -717,14 +664,6 @@ var Raster = Item.extend(/** @lends Raster# */{
         data[2] = components[2] * 255;
         data[3] = alpha != null ? alpha * 255 : 255;
         ctx.putImageData(imageData, point.x, point.y);
-    },
-
-    /**
-     * Clears the image, if it is backed by a canvas.
-     */
-    clear: function() {
-        var size = this._size;
-        this.getContext(true).clearRect(0, 0, size.width + 1, size.height + 1);
     },
 
     // DOCS: document Raster#createImageData
@@ -822,8 +761,7 @@ var Raster = Item.extend(/** @lends Raster# */{
 
     _draw: function(ctx, param, viewMatrix) {
         var element = this.getElement();
-        // Only draw if image is not empty (#1320).
-        if (element && element.width > 0 && element.height > 0) {
+        if (element) {
             // Handle opacity for Rasters separately from the rest, since
             // Rasters never draw a stroke. See Item#draw().
             ctx.globalAlpha = this._opacity;

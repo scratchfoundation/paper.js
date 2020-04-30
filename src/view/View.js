@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2019, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & https://puckey.studio/
+ * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
+ * http://scratchdisk.com/ & http://jonathanpuckey.com/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -522,7 +522,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @bean
      * @type Number
-     * @see #scaling
+     * @see #getScaling()
      */
     getZoom: function() {
         var scaling = this._decompose().scaling;
@@ -559,7 +559,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @bean
      * @type Point
-     * @see #zoom
+     * @see #getZoom()
      */
     getScaling: function() {
         var scaling = this._decompose().scaling;
@@ -1496,7 +1496,7 @@ new function() { // Injection scope for event handling on the browser
             updateFocus: updateFocus,
 
             /**
-             * Clear all events handling state information. Made for testing
+             * Clear all events handling state informations. Made for testing
              * purpose, to have a way to start with a fresh state before each
              * test.
              * @private
