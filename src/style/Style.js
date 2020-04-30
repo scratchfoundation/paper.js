@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2019, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & https://puckey.studio/
+ * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
+ * http://scratchdisk.com/ & http://jonathanpuckey.com/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -162,35 +162,29 @@ var Style = Base.extend(new function() {
         //   raw value is stored, and conversion only happens in the getter.
         fields[set] = function(value) {
             var owner = this._owner,
-                children = owner && owner._children,
-                applyToChildren = children && children.length > 0
-                    && !(owner instanceof CompoundPath);
+                children = owner && owner._children;
             // Only unify styles on children of Groups, excluding CompoundPaths.
-            if (applyToChildren) {
+            if (children && children.length > 0
+                    && !(owner instanceof CompoundPath)) {
                 for (var i = 0, l = children.length; i < l; i++)
                     children[i]._style[set](value);
-            }
-            // Always store selectedColor in item _values to make sure that
-            // group selected bounds and position color is coherent whether it
-            // has children or not when the value is set.
-            if ((key === 'selectedColor' || !applyToChildren)
-                    && key in this._defaults) {
+            } else if (key in this._defaults) {
                 var old = this._values[key];
                 if (old !== value) {
                     if (isColor) {
                         // The old value may be a native string or other color
                         // description that wasn't coerced to a color object yet
-                        if (old) {
-                            Color._setOwner(old, null);
+                        if (old && old._owner !== undefined) {
+                            old._owner = undefined;
                             old._canvasStyle = null;
                         }
                         if (value && value.constructor === Color) {
+                            // Clone color if it already has an owner.
                             // NOTE: If value is not a Color, it is only
                             // converted and cloned in the getter further down.
-                            value = Color._setOwner(value, owner,
-                                    // Only provide a color-setter if the style
-                                    // is to be applied to the children:
-                                    applyToChildren && set);
+                            if (value._owner)
+                                value = value.clone();
+                            value._owner = owner;
                         }
                     }
                     // NOTE: We do not convert the values to Colors in the
@@ -207,13 +201,29 @@ var Style = Base.extend(new function() {
         fields[get] = function(_dontMerge) {
             var owner = this._owner,
                 children = owner && owner._children,
-                applyToChildren = children && children.length > 0
-                    && !(owner instanceof CompoundPath),
                 value;
             // If the owner has children, walk through all of them and see if
             // they all have the same style.
-            // If true is passed for _dontMerge, don't merge children styles.
-            if (applyToChildren && !_dontMerge) {
+            // If true is passed for _dontMerge, don't merge children styles
+            if (key in this._defaults && (!children || !children.length
+                    || _dontMerge || owner instanceof CompoundPath)) {
+                var value = this._values[key];
+                if (value === undefined) {
+                    value = this._defaults[key];
+                    if (value && value.clone)
+                        value = value.clone();
+                } else {
+                    var ctor = isColor ? Color : isPoint ? Point : null;
+                    if (ctor && !(value && value.constructor === ctor)) {
+                        // Convert to a Color / Point, and stored result of the
+                        // conversion.
+                        this._values[key] = value = ctor.read([value], 0,
+                                { readNull: true, clone: true });
+                        if (value && isColor)
+                            value._owner = owner;
+                    }
+                }
+            } else if (children) {
                 for (var i = 0, l = children.length; i < l; i++) {
                     var childValue = children[i]._style[get]();
                     if (!i) {
@@ -224,30 +234,6 @@ var Style = Base.extend(new function() {
                         return undefined;
                     }
                 }
-            } else if (key in this._defaults) {
-                var value = this._values[key];
-                if (value === undefined) {
-                    value = this._defaults[key];
-                    // Clone defaults if available:
-                    if (value && value.clone) {
-                        value = value.clone();
-                    }
-                } else {
-                    var ctor = isColor ? Color : isPoint ? Point : null;
-                    if (ctor && !(value && value.constructor === ctor)) {
-                        // Convert to a Color / Point, and stored result of the
-                        // conversion.
-                        this._values[key] = value = ctor.read([value], 0,
-                                { readNull: true, clone: true });
-                    }
-                }
-            }
-            if (value && isColor) {
-                // Color._setOwner() may clone the color if it already has a
-                // different owner (e.g. resulting from `childValue` above).
-                // Only provide a color-setter if the style is to be applied to
-                // the children:
-                value = Color._setOwner(value, owner, applyToChildren && set);
             }
             return value;
         };
@@ -544,7 +530,7 @@ var Style = Base.extend(new function() {
      *
      * @name Style#dashArray
      * @property
-     * @type Number[]
+     * @type Array
      * @default []
      */
 

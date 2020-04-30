@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2019, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & https://puckey.studio/
+ * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
+ * http://scratchdisk.com/ & http://jonathanpuckey.com/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -104,8 +104,6 @@ var Matrix = Base.extend(/** @lends Matrix# */{
      * also work for calls of `set()`.
      *
      * @function
-     * @param {...*} values
-     * @return {Point}
      */
     set: '#initialize',
 
@@ -185,7 +183,7 @@ var Matrix = Base.extend(/** @lends Matrix# */{
      * Attempts to apply the matrix to the content of item that it belongs to,
      * meaning its transformation is baked into the item's content or children.
      *
-     * @param {Boolean} [recursively=true] controls whether to apply transformations
+     * @param {Boolean} recursively controls whether to apply transformations
      * recursively on children
      * @return {Boolean} {@true if the matrix was applied}
      */
@@ -451,7 +449,7 @@ var Matrix = Base.extend(/** @lends Matrix# */{
     /**
      * Returns a new matrix as the result of prepending the specified matrix
      * to this matrix. This is the equivalent of multiplying
-     * `(specified matrix) * (this matrix)`.
+     * `(specified matrix) s* (this matrix)`.
      *
      * @param {Matrix} matrix the matrix to prepend
      * @return {Matrix} the newly created matrix
@@ -500,15 +498,15 @@ var Matrix = Base.extend(/** @lends Matrix# */{
     },
 
     /**
-     * @deprecated use {@link #append(matrix)} instead.
+     * @deprecated use use {@link #append(matrix)} instead.
      */
     concatenate: '#append',
     /**
-     * @deprecated use {@link #prepend(matrix)} instead.
+     * @deprecated use use {@link #prepend(matrix)} instead.
      */
     preConcatenate: '#prepend',
     /**
-     * @deprecated use {@link #appended(matrix)} instead.
+     * @deprecated use use {@link #appended(matrix)} instead.
      */
     chain: '#appended',
 
@@ -646,7 +644,6 @@ var Matrix = Base.extend(/** @lends Matrix# */{
      * Inverse transforms a point and returns the result.
      *
      * @param {Point} point the point to be transformed
-     * @return {Point}
      */
     inverseTransform: function(/* point */) {
         return this._inverseTransform(Point.read(arguments));

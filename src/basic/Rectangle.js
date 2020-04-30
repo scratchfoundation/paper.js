@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2019, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & https://puckey.studio/
+ * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
+ * http://scratchdisk.com/ & http://jonathanpuckey.com/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -73,7 +73,7 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
      * Creates a new rectangle object from the passed rectangle object.
      *
      * @name Rectangle#initialize
-     * @param {Rectangle} rectangle
+     * @param {Rectangle} rt
      */
     initialize: function Rectangle(arg0, arg1, arg2, arg3) {
         var type = typeof arg0,
@@ -159,8 +159,6 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
      * constructors also work for calls of `set()`.
      *
      * @function
-     * @param {...*} values
-     * @return {Rectangle}
      */
     set: '#initialize',
 
@@ -203,7 +201,6 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
 
     /**
      * Returns a copy of the rectangle.
-     * @return {Rectangle}
      */
     clone: function() {
         return new Rectangle(this.x, this.y, this.width, this.height);
@@ -775,8 +772,6 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
      * Rectangle#contains(point)} returns `false` for that point.
      *
      * @param {Point} point
-     * @return {Rectangle} the smallest rectangle that contains both the
-     * original rectangle and the specified point
      */
     include: function(/* point */) {
         var point = Point.read(arguments);
@@ -788,18 +783,17 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
     },
 
     /**
-     * Returns a new rectangle expanded by the specified amount in horizontal
-     * and vertical directions.
+     * Expands the rectangle by the specified amount in horizontal and
+     * vertical directions.
      *
      * @name Rectangle#expand
      * @function
      * @param {Number|Size|Point} amount the amount to expand the rectangle in
      * both directions
-     * @return {Rectangle} the expanded rectangle
      */
     /**
-     * Returns a new rectangle expanded by the specified amounts in horizontal
-     * and vertical directions.
+     * Expands the rectangle by the specified amounts in horizontal and
+     * vertical directions.
      *
      * @name Rectangle#expand
      * @function
@@ -807,7 +801,6 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
      * direction
      * @param {Number} ver the amount to expand the rectangle in vertical
      * direction
-     * @return {Rectangle} the expanded rectangle
      */
     expand: function(/* amount */) {
         var amount = Size.read(arguments),
@@ -818,23 +811,21 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
     },
 
     /**
-     * Returns a new rectangle scaled by the specified amount from its center.
+     * Scales the rectangle by the specified amount from its center.
      *
      * @name Rectangle#scale
      * @function
      * @param {Number} amount
-     * @return {Rectangle} the scaled rectangle
      */
     /**
-     * Returns a new rectangle scaled in horizontal direction by the specified
-     * `hor` amount and in vertical direction by the specified `ver` amount
-     * from its center.
+     * Scales the rectangle in horizontal direction by the specified `hor`
+     * amount and in vertical direction by the specified `ver` amount from its
+     * center.
      *
      * @name Rectangle#scale
      * @function
      * @param {Number} hor
      * @param {Number} ver
-     * @return {Rectangle} the scaled rectangle
      */
     scale: function(hor, ver) {
         return this.expand(this.width * hor - this.width,

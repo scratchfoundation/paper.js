@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2019, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & https://puckey.studio/
+ * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
+ * http://scratchdisk.com/ & http://jonathanpuckey.com/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -22,12 +22,11 @@ new function() {
     var definitions = {},
         rootSize;
 
-    function getValue(node, name, isString, allowNull, allowPercent,
-            defaultValue) {
+    function getValue(node, name, isString, allowNull, allowPercent) {
         // Interpret value as number. Never return NaN, but 0 instead.
         // If the value is a sequence of numbers, parseFloat will
         // return the first occurring number, which is enough for now.
-        var value = SvgElement.get(node, name) || defaultValue,
+        var value = SvgElement.get(node, name),
             res = value == null
                 ? allowNull
                     ? null
@@ -44,9 +43,9 @@ new function() {
             : res;
     }
 
-    function getPoint(node, x, y, allowNull, allowPercent, defaultX, defaultY) {
-        x = getValue(node, x || 'x', false, allowNull, allowPercent, defaultX);
-        y = getValue(node, y || 'y', false, allowNull, allowPercent, defaultY);
+    function getPoint(node, x, y, allowNull, allowPercent) {
+        x = getValue(node, x || 'x', false, allowNull, allowPercent);
+        y = getValue(node, y || 'y', false, allowNull, allowPercent);
         return allowNull && (x == null || y == null) ? null
                 : new Point(x, y);
     }
@@ -169,16 +168,13 @@ new function() {
                 'userSpaceOnUse';
         // Allow percentages in all values if scaleToBounds is true:
         if (radial) {
-            origin = getPoint(node, 'cx', 'cy', false, scaleToBounds,
-                '50%', '50%');
+            origin = getPoint(node, 'cx', 'cy', false, scaleToBounds);
             destination = origin.add(
-                getValue(node, 'r', false, false, scaleToBounds, '50%'), 0);
+                    getValue(node, 'r', false, false, scaleToBounds), 0);
             highlight = getPoint(node, 'fx', 'fy', true, scaleToBounds);
         } else {
-            origin = getPoint(node, 'x1', 'y1', false, scaleToBounds,
-                '0%', '0%');
-            destination = getPoint(node, 'x2', 'y2', false, scaleToBounds,
-                '100%', '0%');
+            origin = getPoint(node, 'x1', 'y1', false, scaleToBounds);
+            destination = getPoint(node, 'x2', 'y2', false, scaleToBounds);
         }
         var color = applyAttributes(
                 new Color(gradient, origin, destination, highlight), node);
@@ -200,23 +196,23 @@ new function() {
                     return importNode(child, options, isRoot);
             }
         },
-        // https://www.w3.org/TR/SVG/struct.html#Groups
+        // http://www.w3.org/TR/SVG/struct.html#Groups
         g: importGroup,
-        // https://www.w3.org/TR/SVG/struct.html#NewDocument
+        // http://www.w3.org/TR/SVG/struct.html#NewDocument
         svg: importGroup,
         clippath: importGroup,
-        // https://www.w3.org/TR/SVG/shapes.html#PolygonElement
+        // http://www.w3.org/TR/SVG/shapes.html#PolygonElement
         polygon: importPoly,
-        // https://www.w3.org/TR/SVG/shapes.html#PolylineElement
+        // http://www.w3.org/TR/SVG/shapes.html#PolylineElement
         polyline: importPoly,
-        // https://www.w3.org/TR/SVG/paths.html
+        // http://www.w3.org/TR/SVG/paths.html
         path: importPath,
-        // https://www.w3.org/TR/SVG/pservers.html#LinearGradients
+        // http://www.w3.org/TR/SVG/pservers.html#LinearGradients
         lineargradient: importGradient,
-        // https://www.w3.org/TR/SVG/pservers.html#RadialGradients
+        // http://www.w3.org/TR/SVG/pservers.html#RadialGradients
         radialgradient: importGradient,
 
-        // https://www.w3.org/TR/SVG/struct.html#ImageElement
+        // http://www.w3.org/TR/SVG/struct.html#ImageElement
         image: function (node) {
             var raster = new Raster(getValue(node, 'href', true));
             raster.on('load', function() {
@@ -232,17 +228,17 @@ new function() {
             return raster;
         },
 
-        // https://www.w3.org/TR/SVG/struct.html#SymbolElement
+        // http://www.w3.org/TR/SVG/struct.html#SymbolElement
         symbol: function(node, type, options, isRoot) {
             return new SymbolDefinition(
                     // Pass true for dontCenter:
                     importGroup(node, type, options, isRoot), true);
         },
 
-        // https://www.w3.org/TR/SVG/struct.html#DefsElement
+        // http://www.w3.org/TR/SVG/struct.html#DefsElement
         defs: importGroup,
 
-        // https://www.w3.org/TR/SVG/struct.html#UseElement
+        // http://www.w3.org/TR/SVG/struct.html#UseElement
         use: function(node) {
             // Note the namespaced xlink:href attribute is just called href
             // as a property on node.
@@ -262,14 +258,14 @@ new function() {
                     : null;
         },
 
-        // https://www.w3.org/TR/SVG/shapes.html#InterfaceSVGCircleElement
+        // http://www.w3.org/TR/SVG/shapes.html#InterfaceSVGCircleElement
         circle: function(node) {
             return new Shape.Circle(
                     getPoint(node, 'cx', 'cy'),
                     getValue(node, 'r'));
         },
 
-        // https://www.w3.org/TR/SVG/shapes.html#InterfaceSVGEllipseElement
+        // http://www.w3.org/TR/SVG/shapes.html#InterfaceSVGEllipseElement
         ellipse: function(node) {
             // We only use object literal notation where the default one is not
             // supported (e.g. center / radius fo Shape.Ellipse).
@@ -279,7 +275,7 @@ new function() {
             });
         },
 
-        // https://www.w3.org/TR/SVG/shapes.html#RectElement
+        // http://www.w3.org/TR/SVG/shapes.html#RectElement
         rect: function(node) {
             return new Shape.Rectangle(new Rectangle(
                         getPoint(node),
@@ -287,7 +283,7 @@ new function() {
                     ), getSize(node, 'rx', 'ry'));
             },
 
-        // https://www.w3.org/TR/SVG/shapes.html#LineElement
+        // http://www.w3.org/TR/SVG/shapes.html#LineElement
         line: function(node) {
             return new Path.Line(
                     getPoint(node, 'x1', 'y1'),
@@ -349,11 +345,7 @@ new function() {
                 text.setContent(lines.join('\n'));
                 return text;
             }
-        },
-
-        // https://www.w3.org/TR/SVG/struct.html#SwitchElement
-        // Conditional attributes are ignored and all children are rendered.
-        switch: importGroup
+        }
     };
 
     // Attributes and Styles
@@ -364,7 +356,7 @@ new function() {
 
     function applyTransform(item, value, name, node) {
         if (item.transform) {
-            // https://www.w3.org/TR/SVG/types.html#DataTypeTransformList
+            // http://www.w3.org/TR/SVG/types.html#DataTypeTransformList
             // Parse SVG transform string. First we split at /)\s*/, to separate
             // commands
             var transforms = (node.getAttribute(name) || '').split(/\)\s*/g),
@@ -407,8 +399,8 @@ new function() {
     }
 
     function applyOpacity(item, value, name) {
-        // https://www.w3.org/TR/SVG/painting.html#FillOpacityProperty
-        // https://www.w3.org/TR/SVG/painting.html#StrokeOpacityProperty
+        // http://www.w3.org/TR/SVG/painting.html#FillOpacityProperty
+        // http://www.w3.org/TR/SVG/painting.html#StrokeOpacityProperty
         var key = name === 'fill-opacity' ? 'getFillColor' : 'getStrokeColor',
             color = item[key] && item[key]();
         if (color)
@@ -450,7 +442,7 @@ new function() {
         },
 
         'clip-path': function(item, value) {
-            // https://www.w3.org/TR/SVG/masking.html#ClipPathProperty
+            // http://www.w3.org/TR/SVG/masking.html#ClipPathProperty
             var clip = getDefinition(value);
             if (clip) {
                 clip = clip.clone();
@@ -482,20 +474,20 @@ new function() {
         },
 
         'stop-color': function(item, value) {
-            // https://www.w3.org/TR/SVG/pservers.html#StopColorProperty
+            // http://www.w3.org/TR/SVG/pservers.html#StopColorProperty
             if (item.setColor)
                 item.setColor(value);
         },
 
         'stop-opacity': function(item, value) {
-            // https://www.w3.org/TR/SVG/pservers.html#StopOpacityProperty
+            // http://www.w3.org/TR/SVG/pservers.html#StopOpacityProperty
             // NOTE: It is important that this is applied after stop-color!
             if (item._color)
                 item._color.setAlpha(parseFloat(value));
         },
 
         offset: function(item, value) {
-            // https://www.w3.org/TR/SVG/pservers.html#StopElementOffsetAttribute
+            // http://www.w3.org/TR/SVG/pservers.html#StopElementOffsetAttribute
             if (item.setOffset) {
                 var percent = value.match(/(.*)%$/);
                 item.setOffset(percent ? percent[1] / 100 : parseFloat(value));
@@ -503,7 +495,7 @@ new function() {
         },
 
         viewBox: function(item, value, name, node, styles) {
-            // https://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute
+            // http://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute
             // TODO: implement preserveAspectRatio attribute
             // viewBox will be applied both to the group that's created for the
             // content in SymbolDefinition#item, and the SymbolItem itself.
