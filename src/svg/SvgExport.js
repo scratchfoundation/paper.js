@@ -304,6 +304,12 @@ new function() {
             var get = entry.get,
                 type = entry.type,
                 value = item[get]();
+
+            // In some cases, the style's value is undefined. Trying to save it
+            // will result in erroneous behavior; for instance, properties like
+            // "fill-rule" will have the invalid value of "none" if undefined.
+            if (value === undefined) return;
+
             if (entry.exportFilter
                     ? entry.exportFilter(item, value)
                     : !parent || !Base.equals(parent[get](), value) ||
