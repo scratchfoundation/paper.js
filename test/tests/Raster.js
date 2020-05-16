@@ -180,17 +180,17 @@ test('Raster#getAverageColor(path) with compound path', function() {
             { tolerance: 1e-3 });
 });
 
-test('Raster#smoothing defaults to true', function() {
+test('Raster#smoothing defaults to false', function() {
     var raster = new Raster();
-    equals(raster.smoothing, true);
+    equals(raster.smoothing, false);
 });
 
 test('Raster#smoothing', function() {
-    var raster = new Raster({ smoothing: false });
-    equals(raster.smoothing, false);
-
-    raster.smoothing = true;
+    var raster = new Raster({ smoothing: true });
     equals(raster.smoothing, true);
+
+    raster.smoothing = false;
+    equals(raster.smoothing, false);
 });
 
 test('Raster#setSmoothing setting does not impact canvas context', function(assert) {
