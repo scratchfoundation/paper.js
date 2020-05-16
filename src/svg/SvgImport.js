@@ -445,7 +445,9 @@ new function() {
     }, {}), {
         id: function(item, value) {
             definitions[value] = item;
-            if (item.setName)
+            // Same check used in setName to test if IDs are numeric. Numeric IDs make setName throw an exception.
+            // Better to duplicate the check than to wrap this in a try block & swallow all other potential exceptions.
+            if (item.setName && ((+value) + '' !== value))
                 item.setName(value);
         },
 
