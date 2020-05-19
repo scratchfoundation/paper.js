@@ -53,6 +53,8 @@ var View = Base.extend(Emitter, /** @lends View# */{
             DomElement.setPrefixed(element.style, {
                 userDrag: none,
                 userSelect: none,
+                // Prevent pointer events from doing things like panning the page
+                touchAction: none,
                 touchCallout: none,
                 contentZooming: none,
                 tapHighlightColor: 'rgba(0,0,0,0)'
@@ -1069,7 +1071,7 @@ new function() { // Injection scope for event handling on the browser
     // Touch handling inspired by Hammer.js
     var navigator = window.navigator,
         mousedown, mousemove, mouseup;
-    if (navigator.pointerEnabled || navigator.msPointerEnabled) {
+    if (window.PointerEvent || navigator.msPointerEnabled) {
         // HTML5 / MS pointer events
         mousedown = 'pointerdown MSPointerDown';
         mousemove = 'pointermove MSPointerMove';
