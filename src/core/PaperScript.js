@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & http://jonathanpuckey.com/
+ * Copyright (c) 2011 - 2020, Jürg Lehni & Jonathan Puckey
+ * http://juerglehni.com/ & https://puckey.studio/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -127,7 +127,7 @@ Base.exports.PaperScript = function() {
      *     mapping, in case the code that's passed in has already been mingled.
      *
      * @param {String} code the PaperScript code
-     * @param {Object} [option] the compilation options
+     * @param {Object} [options] the compilation options
      * @return {Object} an object holding the compiled PaperScript translated
      *     into JavaScript code along with source-maps and other information.
      */
@@ -177,7 +177,7 @@ Base.exports.PaperScript = function() {
             var start = getOffset(node.range[0]),
                 end = getOffset(node.range[1]),
                 insert = 0;
-            // Sort insertions by their offset, so getOffest() can do its thing
+            // Sort insertions by their offset, so getOffset() can do its thing
             for (var i = insertions.length - 1; i >= 0; i--) {
                 if (start > insertions[i][0]) {
                     insert = i + 1;
@@ -188,27 +188,8 @@ Base.exports.PaperScript = function() {
             code = code.substring(0, start) + str + code.substring(end);
         }
 
-        // Recursively walks the AST and replaces the code of certain nodes
-        function walkAST(node, parent) {
-            if (!node)
-                return;
-            // The easiest way to walk through the whole AST is to simply loop
-            // over each property of the node and filter out fields we don't
-            // need to consider...
-            for (var key in node) {
-                if (key === 'range' || key === 'loc')
-                    continue;
-                var value = node[key];
-                if (Array.isArray(value)) {
-                    for (var i = 0, l = value.length; i < l; i++)
-                        walkAST(value[i], node);
-                } else if (value && typeof value === 'object') {
-                    // We cannot use Base.isPlainObject() for these since
-                    // Acorn.js uses its own internal prototypes now.
-                    walkAST(value, node);
-                }
-            }
-            switch (node.type) {
+        function handleOverloading(node, parent) {
+			switch (node.type) {
             case 'UnaryExpression': // -a
                 if (node.operator in unaryOperators
                         && node.argument.type !== 'Literal') {
@@ -256,12 +237,19 @@ Base.exports.PaperScript = function() {
                             exp = '__$__(' + arg + ', "' + node.operator[0]
                                     + '", 1)',
                             str = arg + ' = ' + exp;
-                        // If this is not a prefixed update expression
-                        // (++a, --a), assign the old value before updating it.
-                        if (!node.prefix
-                                && (parentType === 'AssignmentExpression'
-                                    || parentType === 'VariableDeclarator')) {
-                            // Handle special issue #691 where the old value is
+                        if (node.prefix) {
+                            // A prefixed update expression (++a / --a),
+                            // wrap expression in paranthesis. See #1611
+                            str = '(' + str + ')';
+                        } else if (
+                            // A suffixed update expression (a++, a--),
+                            // assign the old value before updating it.
+                            // See #691, #1450
+                            parentType === 'AssignmentExpression' ||
+                            parentType === 'VariableDeclarator' ||
+                            parentType === 'BinaryExpression'
+                        ) {
+                            // Handle special case where the old value is
                             // assigned to itself, and the expression is just
                             // executed after, e.g.: `var x = ***; x = x++;`
                             if (getCode(parent.left || parent.id) === arg)
@@ -284,6 +272,11 @@ Base.exports.PaperScript = function() {
                     }
                 }
                 break;
+            }
+        }
+
+        function handleExports(node) {
+			switch (node.type) {
             case 'ExportDefaultDeclaration':
                 // Convert `export default` to `module.exports = ` statements:
                 replaceCode({
@@ -321,9 +314,38 @@ Base.exports.PaperScript = function() {
             }
         }
 
+        // Recursively walks the AST and replaces the code of certain nodes
+        function walkAST(node, parent, paperFeatures) {
+            if (node) {
+                // The easiest way to walk through the whole AST is to simply
+                // loop over each property of the node and filter out fields we
+                // don't need to consider...
+                for (var key in node) {
+                    if (key !== 'range' && key !== 'loc') {
+                        var value = node[key];
+                        if (Array.isArray(value)) {
+                            for (var i = 0, l = value.length; i < l; i++) {
+                                walkAST(value[i], node, paperFeatures);
+                            }
+                        } else if (value && typeof value === 'object') {
+                            // Don't use Base.isPlainObject() for these since
+                            // Acorn.js uses its own internal prototypes now.
+                            walkAST(value, node, paperFeatures);
+                        }
+                    }
+                }
+                if (paperFeatures.operatorOverloading !== false) {
+                    handleOverloading(node, parent);
+                }
+                if (paperFeatures.moduleExports !== false) {
+                    handleExports(node);
+                }
+            }
+        }
+
         // Source-map support:
         // Encodes a Variable Length Quantity as a Base64 string.
-        // See: http://www.html5rocks.com/en/tutorials/developertools/sourcemaps
+        // See: https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/
         function encodeVLQ(value) {
             var res = '',
                 base64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -339,15 +361,16 @@ Base.exports.PaperScript = function() {
         }
 
         var url = options.url || '',
-            agent = paper.agent,
-            version = agent.versionNumber,
-            offsetCode = false,
             sourceMaps = options.sourceMaps,
+            paperFeatures = options.paperFeatures || {},
             // Include the original code in the sourceMap if there is no linked
             // source file so the debugger can still display it correctly.
             source = options.source || code,
-            lineBreaks = /\r\n|\n|\r/mg,
             offset = options.offset || 0,
+            agent = paper.agent,
+            version = agent.versionNumber,
+            offsetCode = false,
+            lineBreaks = /\r\n|\n|\r/mg,
             map;
         // TODO: Verify these browser versions for source map support, and check
         // other browsers.
@@ -397,12 +420,17 @@ Base.exports.PaperScript = function() {
                 sourcesContent: [source]
             };
         }
-        // Now do the parsing magic
-        walkAST(parse(code, {
-            ranges: true,
-            preserveParens: true,
-            sourceType: 'module'
-        }));
+        if (
+            paperFeatures.operatorOverloading !== false ||
+            paperFeatures.moduleExports !== false
+        ) {
+            // Now do the parsing magic
+            walkAST(parse(code, {
+                ranges: true,
+                preserveParens: true,
+                sourceType: 'module'
+            }), null, paperFeatures);
+        }
         if (map) {
             if (offsetCode) {
                 // Adjust the line offset of the resulting code if required.
@@ -441,8 +469,8 @@ Base.exports.PaperScript = function() {
      *
      * @param {String} code the PaperScript code
      * @param {PaperScope} scope the scope for which the code is executed
-     * @param {Object} [option] the compilation options
-     * @return the exports defined in the executed code
+     * @param {Object} [options] the compilation options
+     * @return {Object} the exports defined in the executed code
      */
     function execute(code, scope, options) {
         // Set currently active scope.
@@ -484,7 +512,7 @@ Base.exports.PaperScript = function() {
                 }
             }
         }
-        expose({ __$__: __$__, $__: $__, paper: scope, view: view, tool: tool },
+        expose({ __$__: __$__, $__: $__, paper: scope, tool: tool },
                 true);
         expose(scope);
         // Add a fake `module.exports` object so PaperScripts can export things.
@@ -657,7 +685,9 @@ Base.exports.PaperScript = function() {
         compile: compile,
         execute: execute,
         load: load,
-        parse: parse
+        parse: parse,
+        calculateBinary: __$__,
+        calculateUnary: $__
     };
 // Pass on `this` as the binding object, so we can reference Acorn both in
 // development and in the built library.

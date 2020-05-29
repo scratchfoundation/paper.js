@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & http://jonathanpuckey.com/
+ * Copyright (c) 2011 - 2020, Jürg Lehni & Jonathan Puckey
+ * http://juerglehni.com/ & https://puckey.studio/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -658,8 +658,8 @@ new function() { // Injection scope for various item event handlers
 
     /**
      * Specifies whether the item defines a clip mask. This can only be set on
-     * paths, compound paths, and text frame objects, and only if the item is
-     * already contained within a clipping group.
+     * paths and compound paths, and only if the item is already contained
+     * within a clipping group.
      *
      * @bean
      * @type Boolean
@@ -1075,7 +1075,9 @@ new function() { // Injection scope for various item event handlers
             options = options || {};
             for (var i = 0, l = items.length; i < l; i++) {
                 var item = items[i];
-                if (item._visible && !item.isEmpty()) {
+                // Item is handled if it is visible and not recursively empty.
+                // This avoid errors with nested empty groups (#1467).
+                if (item._visible && !item.isEmpty(true)) {
                     // Pass true for noInternal, since even when getting
                     // internal bounds for this item, we need to apply the
                     // matrices to its children.
@@ -1117,6 +1119,17 @@ new function() { // Injection scope for various item event handlers
      * The bounding rectangle of the item including handles.
      *
      * @name Item#handleBounds
+     * @type Rectangle
+     */
+
+    /**
+     * The bounding rectangle of the item without any matrix transformations.
+     *
+     * Typical use case would be drawing a frame around the object where you
+     * want to draw something of the same size, position, rotation, and scaling,
+     * like a selection frame.
+     *
+     * @name Item#internalBounds
      * @type Rectangle
      */
 
@@ -1805,11 +1818,15 @@ new function() { // Injection scope for various item event handlers
      * }
      *
      * @param {Point} point the point to check for
+     * @return {Boolean}
      */
     contains: function(/* point */) {
         // See CompoundPath#_contains() for the reason for !!
-        return !!this._contains(
-                this._matrix._inverseTransform(Point.read(arguments)));
+        var matrix = this._matrix;
+        return (
+            matrix.isInvertible() &&
+            !!this._contains(matrix._inverseTransform(Point.read(arguments)))
+        );
     },
 
     _contains: function(point) {
@@ -1866,16 +1883,18 @@ new function() { // Injection scope for various item event handlers
 },
 new function() { // Injection scope for hit-test functions shared with project
     function hitTest(/* point, options */) {
+        var args = arguments;
         return this._hitTest(
-                Point.read(arguments),
-                HitResult.getOptions(arguments));
+                Point.read(args),
+                HitResult.getOptions(args));
     }
 
     function hitTestAll(/* point, options */) {
-        var point = Point.read(arguments),
-            options = HitResult.getOptions(arguments),
+        var args = arguments,
+            point = Point.read(args),
+            options = HitResult.getOptions(args),
             all = [];
-        this._hitTest(point, Base.set({ all: all }, options));
+        this._hitTest(point, new Base({ all: all }, options));
         return all;
     }
 
@@ -2353,6 +2372,7 @@ new function() { // Injection scope for hit-test functions shared with project
      * items can have children.
      *
      * @param {String} json the JSON data to import from
+     * @return {Item}
      */
     importJSON: function(json) {
         // Try importing into `this`. If another item is returned, try adding
@@ -2388,7 +2408,8 @@ new function() { // Injection scope for hit-test functions shared with project
      *     kept as a link to their external URL.
      *
      * @param {Object} [options] the export options
-     * @return {SVGElement} the item converted to an SVG node
+     * @return {SVGElement|String} the item converted to an SVG node or a
+     * `String` depending on `option.asString` value
      */
 
     /**
@@ -2772,6 +2793,7 @@ new function() { // Injection scope for hit-test functions shared with project
      * Replaces this item with the provided new item which will takes its place
      * in the project hierarchy instead.
      *
+     * @param {Item} item the item that will replace this item
      * @return {Boolean} {@true if the item was replaced}
      */
     replaceWith: function(item) {
@@ -2840,11 +2862,23 @@ new function() { // Injection scope for hit-test functions shared with project
      * no children, a {@link TextItem} with no text content and a {@link Path}
      * with no segments all are considered empty.
      *
-     * @return Boolean
+     * @param {Boolean} [recursively=false] whether an item with children should be
+     * considered empty if all its descendants are empty
+     * @return {Boolean}
      */
-    isEmpty: function() {
+    isEmpty: function(recursively) {
         var children = this._children;
-        return !children || !children.length;
+        var numChildren = children ? children.length : 0;
+        if (recursively) {
+            // In recursive check, item is empty if all its children are empty.
+            for (var i = 0; i < numChildren; i++) {
+                if (!children[i].isEmpty(recursively)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return !numChildren;
     },
 
     /**
@@ -2907,7 +2941,7 @@ new function() { // Injection scope for hit-test functions shared with project
      * defined in such a way, e.g. if one is a descendant of the other.
      */
     _getOrder: function(item) {
-        // Private method that produces a list of anchestors, starting with the
+        // Private method that produces a list of ancestors, starting with the
         // root and ending with the actual element as the last entry.
         function getList(item) {
             var list = [];
@@ -3057,7 +3091,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#strokeColor
      * @property
-     * @type Color
+     * @type ?Color
      *
      * @example {@paperscript}
      * // Setting the stroke color of a path:
@@ -3194,7 +3228,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#dashArray
      * @property
-     * @type Array
+     * @type Number[]
      * @default []
      */
 
@@ -3219,7 +3253,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#fillColor
      * @property
-     * @type Color
+     * @type ?Color
      *
      * @example {@paperscript}
      * // Setting the fill color of a path to red:
@@ -3253,7 +3287,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @property
      * @name Item#shadowColor
-     * @type Color
+     * @type ?Color
      *
      * @example {@paperscript}
      * // Creating a circle with a black shadow:
@@ -3299,13 +3333,14 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#selectedColor
      * @property
-     * @type Color
+     * @type ?Color
      */
 }, Base.each(['rotate', 'scale', 'shear', 'skew'], function(key) {
     var rotate = key === 'rotate';
     this[key] = function(/* value, center */) {
-        var value = (rotate ? Base : Point).read(arguments),
-            center = Point.read(arguments, 0, { readNull: true });
+        var args = arguments,
+            value = (rotate ? Base : Point).read(args),
+            center = Point.read(args, 0, { readNull: true });
         return this.transform(new Matrix()[key](value,
                 center || this.getPosition(true)));
     };
@@ -3438,7 +3473,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#shear
      * @function
-     * @param {Point} shear the horziontal and vertical shear factors as a point
+     * @param {Point} shear the horizontal and vertical shear factors as a point
      * @param {Point} [center={@link Item#position}]
      * @see Matrix#shear(shear[, center])
      */
@@ -3460,7 +3495,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#skew
      * @function
-     * @param {Point} skew the horziontal and vertical skew angles in degrees
+     * @param {Point} skew the horizontal and vertical skew angles in degrees
      * @param {Point} [center={@link Item#position}]
      * @see Matrix#shear(skew[, center])
      */
@@ -3485,19 +3520,22 @@ new function() { // Injection scope for hit-test functions shared with project
     // @param {String[]} flags array of any of the following: 'objects',
     //        'children', 'fill-gradients', 'fill-patterns', 'stroke-patterns',
     //        'lines'. Default: ['objects', 'children']
-    transform: function(matrix, _applyMatrix, _applyRecursively,
-            _setApplyMatrix) {
+    transform: function(matrix, _applyRecursively, _setApplyMatrix) {
         var _matrix = this._matrix,
-            // If no matrix is provided, or the matrix is the identity, we might
-            // still have some work to do in case _applyMatrix is true
             transformMatrix = matrix && !matrix.isIdentity(),
-            applyMatrix = (_applyMatrix || this._applyMatrix)
+            // If no matrix is provided, or the matrix is the identity, we might
+            // still have some work to do: _setApplyMatrix or _applyRecursively.
+            applyMatrix = (
+                _setApplyMatrix && this._canApplyMatrix ||
+                this._applyMatrix && (
                     // Don't apply _matrix if the result of concatenating with
                     // matrix would be identity.
-                    && ((!_matrix.isIdentity() || transformMatrix)
-                        // Even if it's an identity matrix, we still need to
-                        // recursively apply the matrix to children.
-                        || _applyMatrix && _applyRecursively && this._children);
+                    transformMatrix || !_matrix.isIdentity() ||
+                    // Even if it's an identity matrix, we may still need to
+                    // recursively apply the matrix to children.
+                    _applyRecursively && this._children
+                )
+            );
         // Bail out if there is nothing to do.
         if (!transformMatrix && !applyMatrix)
             return this;
@@ -3529,8 +3567,9 @@ new function() { // Injection scope for hit-test functions shared with project
         // internal _matrix transformations to the item's content.
         // Application is not possible on Raster, PointText, SymbolItem, since
         // the matrix is where the actual transformation state is stored.
-        if (applyMatrix && (applyMatrix = this._transformContent(_matrix,
-                _applyRecursively, _setApplyMatrix))) {
+
+        if (applyMatrix && (applyMatrix = this._transformContent(
+                _matrix, _applyRecursively, _setApplyMatrix))) {
             // Pivot is provided in the parent's coordinate system, so transform
             // it along too.
             var pivot = this._pivot;
@@ -3594,9 +3633,9 @@ new function() { // Injection scope for hit-test functions shared with project
     _transformContent: function(matrix, applyRecursively, setApplyMatrix) {
         var children = this._children;
         if (children) {
-            for (var i = 0, l = children.length; i < l; i++)
-                children[i].transform(matrix, true, applyRecursively,
-                        setApplyMatrix);
+            for (var i = 0, l = children.length; i < l; i++) {
+                children[i].transform(matrix, applyRecursively, setApplyMatrix);
+            }
             return true;
         }
     },
@@ -3745,7 +3784,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#onFrame
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onFrame
      *
      * @example {@paperscript}
@@ -3772,7 +3811,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#onMouseDown
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onMouseDown
      *
      * @example {@paperscript}
@@ -3822,7 +3861,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#onMouseDrag
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onMouseDrag
      *
      * @example {@paperscript height=240}
@@ -3851,7 +3890,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#onMouseUp
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onMouseUp
      *
      * @example {@paperscript}
@@ -3881,7 +3920,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#onClick
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onClick
      *
      * @example {@paperscript}
@@ -3931,7 +3970,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#onDoubleClick
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onDoubleClick
      *
      * @example {@paperscript}
@@ -3981,7 +4020,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#onMouseMove
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onMouseMove
      *
      * @example {@paperscript}
@@ -4012,7 +4051,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#onMouseEnter
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onMouseEnter
      *
      * @example {@paperscript}
@@ -4074,7 +4113,7 @@ new function() { // Injection scope for hit-test functions shared with project
      *
      * @name Item#onMouseLeave
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onMouseLeave
      *
      * @example {@paperscript}
@@ -4334,7 +4373,7 @@ new function() { // Injection scope for hit-test functions shared with project
         // Exclude Raster items since they never draw a stroke and handle
         // opacity by themselves (they also don't call _setStyles)
         var blendMode = this._blendMode,
-            opacity = this._opacity,
+            opacity = Numerical.clamp(this._opacity, 0, 1),
             normalBlend = blendMode === 'normal',
             nativeBlend = BlendMode.nativeModes[blendMode],
             // Determine if we can draw directly, or if we need to draw into a
@@ -4417,8 +4456,10 @@ new function() { // Injection scope for hit-test functions shared with project
         this._draw(ctx, param, viewMatrix, strokeMatrix);
         ctx.restore();
         matrices.pop();
-        if (param.clip && !param.dontFinish)
-            ctx.clip();
+        if (param.clip && !param.dontFinish) {
+            // Pass fill-rule to handle clipping with compound-paths (#1361).
+            ctx.clip(this.getFillRule());
+        }
         // If a temporary canvas was created, composite it onto the main canvas:
         if (!direct) {
             // Use BlendMode.process even for processing normal blendMode with
@@ -4672,4 +4713,176 @@ new function() { // Injection scope for hit-test functions shared with project
         }
         return this;
     }
-}));
+}), /** @lends Item# */{
+    /**
+     * {@grouptitle Tweening Functions}
+     *
+     * Tween item between two states.
+     *
+     * @name Item#tween
+     *
+     * @option options.duration {Number} the duration of the tweening
+     * @option [options.easing='linear'] {Function|String} an easing function or the type
+     * of the easing: {@values 'linear' 'easeInQuad' 'easeOutQuad'
+     * 'easeInOutQuad' 'easeInCubic' 'easeOutCubic' 'easeInOutCubic'
+     * 'easeInQuart' 'easeOutQuart' 'easeInOutQuart' 'easeInQuint'
+     * 'easeOutQuint' 'easeInOutQuint'}
+     * @option [options.start=true] {Boolean} whether to start tweening automatically
+     *
+     * @function
+     * @param {Object} from the state at the start of the tweening
+     * @param {Object} to the state at the end of the tweening
+     * @param {Object|Number} options the options or the duration
+     * @return {Tween}
+     *
+     * @example {@paperscript height=100}
+     * // Tween fillColor:
+     * var path = new Path.Circle({
+     *     radius: view.bounds.height * 0.4,
+     *     center: view.center
+     * });
+     * path.tween(
+     *     { fillColor: 'blue' },
+     *     { fillColor: 'red' },
+     *     3000
+     * );
+     * @example {@paperscript height=100}
+     * // Tween rotation:
+     * var path = new Shape.Rectangle({
+     *     fillColor: 'red',
+     *     center: [50, view.center.y],
+     *     size: [60, 60]
+     * });
+     * path.tween({
+     *     rotation: 180,
+     *     'position.x': view.bounds.width - 50,
+     *     'fillColor.hue': '+= 90'
+     * }, {
+     *     easing: 'easeInOutCubic',
+     *     duration: 2000
+     * });
+     */
+    /**
+     * Tween item to a state.
+     *
+     * @name Item#tween
+     *
+     * @function
+     * @param  {Object} to the state at the end of the tweening
+     * @param {Object|Number} options the options or the duration
+     * @return {Tween}
+     *
+     * @example {@paperscript height=200}
+     * // Tween a nested property with relative values
+     * var path = new Path.Rectangle({
+     *     size: [100, 100],
+     *     position: view.center,
+     *     fillColor: 'red',
+     * });
+     *
+     * var delta = { x: path.bounds.width / 2, y: 0 };
+     *
+     * path.tween({
+     *     'segments[1].point': ['+=', delta],
+     *     'segments[2].point.x': '-= 50'
+     * }, 3000);
+     *
+     * @see Item#tween(from, to, options)
+     */
+    /**
+     * Tween item.
+     *
+     * @name Item#tween
+     *
+     * @function
+     * @param  {Object|Number} options the options or the duration
+     * @return {Tween}
+     *
+     * @see Item#tween(from, to, options)
+     *
+     * @example {@paperscript height=100}
+     * // Start an empty tween and just use the update callback:
+     * var path = new Path.Circle({
+     *     fillColor: 'blue',
+     *     radius: view.bounds.height * 0.4,
+     *     center: view.center,
+     * });
+     * var pathFrom = path.clone({ insert: false })
+     * var pathTo = new Path.Rectangle({
+     *     position: view.center,
+     *     rectangle: path.bounds,
+     *     insert: false
+     * });
+     * path.tween(2000).onUpdate = function(event) {
+     *     path.interpolate(pathFrom, pathTo, event.factor)
+     * };
+     */
+    tween: function(from, to, options) {
+        if (!options) {
+            // If there are only two or one arguments, shift arguments to the
+            // left by one (omit `from`):
+            options = to;
+            to = from;
+            from = null;
+            if (!options) {
+                options = to;
+                to = null;
+            }
+        }
+        var easing = options && options.easing,
+            start = options && options.start,
+            duration = options != null && (
+                typeof options === 'number' ? options : options.duration
+            ),
+            tween = new Tween(this, from, to, duration, easing, start);
+        function onFrame(event) {
+            tween._handleFrame(event.time * 1000);
+            if (!tween.running) {
+                this.off('frame', onFrame);
+            }
+        }
+        if (duration) {
+            this.on('frame', onFrame);
+        }
+        return tween;
+    },
+
+    /**
+     *
+     * Tween item to a state.
+     *
+     * @function
+     * @param {Object} to the state at the end of the tweening
+     * @param {Object|Number} options the options or the duration
+     * @return {Tween}
+     *
+     * @see Item#tween(to, options)
+     */
+    tweenTo: function(to, options) {
+        return this.tween(null, to, options);
+    },
+
+    /**
+     *
+     * Tween item from a state to its state before the tweening.
+     *
+     * @function
+     * @param {Object} from the state at the start of the tweening
+     * @param {Object|Number} options the options or the duration
+     * @return {Tween}
+     *
+     * @see Item#tween(from, to, options)
+     *
+     * @example {@paperscript height=100}
+     * // Tween fillColor from red to the path's initial fillColor:
+     * var path = new Path.Circle({
+     *     fillColor: 'blue',
+     *     radius: view.bounds.height * 0.4,
+     *     center: view.center
+     * });
+     * path.tweenFrom({ fillColor: 'red' }, { duration: 1000 });
+     */
+    tweenFrom: function(from, options) {
+        return this.tween(from, null, options);
+    }
+});

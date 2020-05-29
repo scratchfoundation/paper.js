@@ -2,8 +2,8 @@
  * Paper.js v*#=*__options.version - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & http://jonathanpuckey.com/
+ * Copyright (c) 2011 - 2020, Jürg Lehni & Jonathan Puckey
+ * http://juerglehni.com/ & https://puckey.studio/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -15,15 +15,15 @@
  *
  * Straps.js - Class inheritance library with support for bean-style accessors
  *
- * Copyright (c) 2006 - 2016 Juerg Lehni
- * http://scratchdisk.com/
+ * Copyright (c) 2006 - 2020 Jürg Lehni
+ * http://juerglehni.com/
  *
  * Distributed under the MIT license.
  *
  ***
  *
  * Acorn.js
- * http://marijnhaverbeke.nl/acorn/
+ * https://marijnhaverbeke.nl/acorn/
  *
  * Acorn is a tiny, fast JavaScript parser written in JavaScript,
  * created by Marijn Haverbeke and released under an MIT license.
@@ -42,6 +42,7 @@ var paper = function(self, undefined) {
 /*#*/ include('core/PaperScope.js');
 /*#*/ include('core/PaperScopeItem.js');
 
+/*#*/ include('util/CollisionDetection.js');
 /*#*/ include('util/Formatter.js');
 /*#*/ include('util/Numerical.js');
 /*#*/ include('util/UID.js');
@@ -101,6 +102,8 @@ var paper = function(self, undefined) {
 
 /*#*/ include('tool/ToolEvent.js');
 /*#*/ include('tool/Tool.js');
+
+/*#*/ include('anim/Tween.js');
 
 /*#*/ include('net/Http.js');
 

@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & http://jonathanpuckey.com/
+ * Copyright (c) 2011 - 2020, Jürg Lehni & Jonathan Puckey
+ * http://juerglehni.com/ & https://puckey.studio/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -75,7 +75,6 @@ var Path = PathItem.extend(/** @lends Path# */{
      * Creates a new path item from SVG path-data and places it at the top of
      * the active layer.
      *
-     * @param
      * @name Path#initialize
      * @param {String} pathData the SVG path-data that describes the geometry
      * of this path
@@ -99,15 +98,16 @@ var Path = PathItem.extend(/** @lends Path# */{
         // check its first entry for object as well.
         // But first see if segments are directly passed at all. If not, try
         // _set(arg).
-        var segments = Array.isArray(arg)
+        var args = arguments,
+            segments = Array.isArray(arg)
             ? typeof arg[0] === 'object'
                 ? arg
-                : arguments
+                : args
             // See if it behaves like a segment or a point, but filter out
             // rectangles, as accepted by some Path.Constructor constructors.
             : arg && (arg.size === undefined && (arg.x !== undefined
                     || arg.point !== undefined))
-                ? arguments
+                ? args
                 : null;
         // Always call setSegments() to initialize a few related variables.
         if (segments && segments.length > 0) {
@@ -484,9 +484,11 @@ var Path = PathItem.extend(/** @lends Path# */{
      * Adds one or more segments to the end of the {@link #segments} array of
      * this path.
      *
-     * @param {Segment|Point} segment the segment or point to be added.
-     * @return {Segment} the added segment. This is not necessarily the same
-     * object, e.g. if the segment to be added already belongs to another path
+     * @param {...(Segment|Point|Number[])} segment the segment or point to be
+     * added.
+     * @return {Segment|Segment[]} the added segment(s). This is not necessarily
+     * the same object, e.g. if the segment to be added already belongs to
+     * another path.
      *
      * @example {@paperscript}
      * // Adding segments to a path using point objects:
@@ -547,11 +549,12 @@ var Path = PathItem.extend(/** @lends Path# */{
      * path.add(new Point(170, 75));
      */
     add: function(segment1 /*, segment2, ... */) {
-        return arguments.length > 1 && typeof segment1 !== 'number'
+        var args = arguments;
+        return args.length > 1 && typeof segment1 !== 'number'
             // addSegments
-            ? this._add(Segment.readList(arguments))
+            ? this._add(Segment.readList(args))
             // addSegment
-            : this._add([ Segment.read(arguments) ])[0];
+            : this._add([ Segment.read(args) ])[0];
     },
 
     /**
@@ -591,11 +594,12 @@ var Path = PathItem.extend(/** @lends Path# */{
      * myPath.segments[2].selected = true;
      */
     insert: function(index, segment1 /*, segment2, ... */) {
-        return arguments.length > 2 && typeof segment1 !== 'number'
+        var args = arguments;
+        return args.length > 2 && typeof segment1 !== 'number'
             // insertSegments
-            ? this._add(Segment.readList(arguments, 1), index)
+            ? this._add(Segment.readList(args, 1), index)
             // insertSegment
-            : this._add([ Segment.read(arguments, 1) ], index)[0];
+            : this._add([ Segment.read(args, 1) ], index)[0];
     },
 
     addSegment: function(/* segment */) {
@@ -1215,6 +1219,8 @@ var Path = PathItem.extend(/** @lends Path# */{
     /**
      * Reduces the path by removing curves that have a length of 0,
      * and unnecessary segments between two collinear flat curves.
+     *
+     * @return {Path} the reduced path
      */
     reduce: function(options) {
         var curves = this.getCurves(),
@@ -2173,9 +2179,9 @@ new function() { // Scope for drawing
     // performance.
 
     function drawHandles(ctx, segments, matrix, size, isFullySelected) {
-        if (size === 0) {
-            return;
-        }
+        // Only draw if size is not null or negative.
+        if (size <= 0) return;
+
         var half = size / 2,
             coords = new Array(6),
             pX, pY;
@@ -2402,9 +2408,10 @@ new function() { // PostScript-style drawing commands
         },
 
         cubicCurveTo: function(/* handle1, handle2, to */) {
-            var handle1 = Point.read(arguments),
-                handle2 = Point.read(arguments),
-                to = Point.read(arguments),
+            var args = arguments,
+                handle1 = Point.read(args),
+                handle2 = Point.read(args),
+                to = Point.read(args),
                 // First modify the current segment:
                 current = getCurrentSegment(this);
             // Convert to relative values:
@@ -2414,8 +2421,9 @@ new function() { // PostScript-style drawing commands
         },
 
         quadraticCurveTo: function(/* handle, to */) {
-            var handle = Point.read(arguments),
-                to = Point.read(arguments),
+            var args = arguments,
+                handle = Point.read(args),
+                to = Point.read(args),
                 current = getCurrentSegment(this)._point;
             // This is exact:
             // If we have the three quad points: A E D,
@@ -2430,9 +2438,10 @@ new function() { // PostScript-style drawing commands
         },
 
         curveTo: function(/* through, to, time */) {
-            var through = Point.read(arguments),
-                to = Point.read(arguments),
-                t = Base.pick(Base.read(arguments), 0.5),
+            var args = arguments,
+                through = Point.read(args),
+                to = Point.read(args),
+                t = Base.pick(Base.read(args), 0.5),
                 t1 = 1 - t,
                 current = getCurrentSegment(this)._point,
                 // handle = (through - (1 - t)^2 * current - t^2 * to) /
@@ -2448,15 +2457,16 @@ new function() { // PostScript-style drawing commands
         arcTo: function(/* to, clockwise | through, to
                 | to, radius, rotation, clockwise, large */) {
             // Get the start point:
-            var abs = Math.abs,
+            var args = arguments,
+                abs = Math.abs,
                 sqrt = Math.sqrt,
                 current = getCurrentSegment(this),
                 from = current._point,
-                to = Point.read(arguments),
+                to = Point.read(args),
                 through,
                 // Peek at next value to see if it's clockwise, with true as the
                 // default value.
-                peek = Base.peek(arguments),
+                peek = Base.peek(args),
                 clockwise = Base.pick(peek, true),
                 center, extent, vector, matrix;
             // We're handling three different approaches to drawing arcs in one
@@ -2466,14 +2476,15 @@ new function() { // PostScript-style drawing commands
                 var middle = from.add(to).divide(2),
                 through = middle.add(middle.subtract(from).rotate(
                         clockwise ? -90 : 90));
-            } else if (Base.remain(arguments) <= 2) {
+            } else if (Base.remain(args) <= 2) {
                 // #2: arcTo(through, to)
                 through = to;
-                to = Point.read(arguments);
-            } else {
+                to = Point.read(args);
+            } else if (!from.equals(to)) {
                 // #3: arcTo(to, radius, rotation, clockwise, large)
-                // Drawing arcs in SVG style:
-                var radius = Size.read(arguments),
+                // Draw arc in SVG style, but only if `from` and `to` are not
+                // equal (#1613).
+                var radius = Size.read(args),
                     isZero = Numerical.isZero;
                 // If rx = 0 or ry = 0 then this arc is treated as a
                 // straight line joining the endpoints.
@@ -2481,10 +2492,10 @@ new function() { // PostScript-style drawing commands
                 if (isZero(radius.width) || isZero(radius.height))
                     return this.lineTo(to);
                 // See for an explanation of the following calculations:
-                // http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
-                var rotation = Base.read(arguments),
-                    clockwise = !!Base.read(arguments),
-                    large = !!Base.read(arguments),
+                // https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
+                var rotation = Base.read(args),
+                    clockwise = !!Base.read(args),
+                    large = !!Base.read(args),
                     middle = from.add(to).divide(2),
                     pt = from.subtract(middle).rotate(-rotation),
                     x = pt.x,
@@ -2568,47 +2579,49 @@ new function() { // PostScript-style drawing commands
                     extent += extent < 0 ? 360 : -360;
                 }
             }
-            var epsilon = /*#=*/Numerical.GEOMETRIC_EPSILON,
-                ext = abs(extent),
-                // Calculate the amount of segments required to approximate over
-                // `extend` degrees (extend / 90), but prevent ceil() from
-                // rounding up small imprecisions by subtracting epsilon first.
-                count = ext >= 360 ? 4 : Math.ceil((ext - epsilon) / 90),
-                inc = extent / count,
-                half = inc * Math.PI / 360,
-                z = 4 / 3 * Math.sin(half) / (1 + Math.cos(half)),
-                segments = [];
-            for (var i = 0; i <= count; i++) {
-                // Explicitly use to point for last segment, since depending
-                // on values the calculation adds imprecision:
-                var pt = to,
-                    out = null;
-                if (i < count) {
-                    out = vector.rotate(90).multiply(z);
-                    if (matrix) {
-                        pt = matrix._transformPoint(vector);
-                        out = matrix._transformPoint(vector.add(out))
-                                .subtract(pt);
+            if (extent) {
+                var epsilon = /*#=*/Numerical.GEOMETRIC_EPSILON,
+                    ext = abs(extent),
+                    // Calculate amount of segments required to approximate over
+                    // `extend` degrees (extend / 90), but prevent ceil() from
+                    // rounding up small imprecisions by subtracting epsilon.
+                    count = ext >= 360 ? 4 : Math.ceil((ext - epsilon) / 90),
+                    inc = extent / count,
+                    half = inc * Math.PI / 360,
+                    z = 4 / 3 * Math.sin(half) / (1 + Math.cos(half)),
+                    segments = [];
+                for (var i = 0; i <= count; i++) {
+                    // Explicitly use to point for last segment, since depending
+                    // on values the calculation adds imprecision:
+                    var pt = to,
+                        out = null;
+                    if (i < count) {
+                        out = vector.rotate(90).multiply(z);
+                        if (matrix) {
+                            pt = matrix._transformPoint(vector);
+                            out = matrix._transformPoint(vector.add(out))
+                                    .subtract(pt);
+                        } else {
+                            pt = center.add(vector);
+                        }
+                    }
+                    if (!i) {
+                        // Modify startSegment
+                        current.setHandleOut(out);
                     } else {
-                        pt = center.add(vector);
+                        // Add new Segment
+                        var _in = vector.rotate(-90).multiply(z);
+                        if (matrix) {
+                            _in = matrix._transformPoint(vector.add(_in))
+                                    .subtract(pt);
+                        }
+                        segments.push(new Segment(pt, _in, out));
                     }
+                    vector = vector.rotate(inc);
                 }
-                if (!i) {
-                    // Modify startSegment
-                    current.setHandleOut(out);
-                } else {
-                    // Add new Segment
-                    var _in = vector.rotate(-90).multiply(z);
-                    if (matrix) {
-                        _in = matrix._transformPoint(vector.add(_in))
-                                .subtract(pt);
-                    }
-                    segments.push(new Segment(pt, _in, out));
-                }
-                vector = vector.rotate(inc);
+                // Add all segments at once at the end for higher performance
+                this._add(segments);
             }
-            // Add all segments at once at the end for higher performance
-            this._add(segments);
         },
 
         lineBy: function(/* to */) {
@@ -2618,40 +2631,44 @@ new function() { // PostScript-style drawing commands
         },
 
         curveBy: function(/* through, to, parameter */) {
-            var through = Point.read(arguments),
-                to = Point.read(arguments),
-                parameter = Base.read(arguments),
+            var args = arguments,
+                through = Point.read(args),
+                to = Point.read(args),
+                parameter = Base.read(args),
                 current = getCurrentSegment(this)._point;
             this.curveTo(current.add(through), current.add(to), parameter);
         },
 
         cubicCurveBy: function(/* handle1, handle2, to */) {
-            var handle1 = Point.read(arguments),
-                handle2 = Point.read(arguments),
-                to = Point.read(arguments),
+            var args = arguments,
+                handle1 = Point.read(args),
+                handle2 = Point.read(args),
+                to = Point.read(args),
                 current = getCurrentSegment(this)._point;
             this.cubicCurveTo(current.add(handle1), current.add(handle2),
                     current.add(to));
         },
 
         quadraticCurveBy: function(/* handle, to */) {
-            var handle = Point.read(arguments),
-                to = Point.read(arguments),
+            var args = arguments,
+                handle = Point.read(args),
+                to = Point.read(args),
                 current = getCurrentSegment(this)._point;
             this.quadraticCurveTo(current.add(handle), current.add(to));
         },
 
         // TODO: Implement version for: (to, radius, rotation, clockwise, large)
         arcBy: function(/* to, clockwise | through, to */) {
-            var current = getCurrentSegment(this)._point,
-                point = current.add(Point.read(arguments)),
+            var args = arguments,
+                current = getCurrentSegment(this)._point,
+                point = current.add(Point.read(args)),
                 // Peek at next value to see if it's clockwise, with true as
                 // default value.
-                clockwise = Base.pick(Base.peek(arguments), true);
+                clockwise = Base.pick(Base.peek(args), true);
             if (typeof clockwise === 'boolean') {
                 this.arcTo(point, clockwise);
             } else {
-                this.arcTo(point, current.add(Point.read(arguments)));
+                this.arcTo(point, current.add(Point.read(args)));
             }
         },
 
@@ -2780,15 +2797,18 @@ statics: {
         }
 
         var length = segments.length - (closed ? 0 : 1);
-        for (var i = 1; i < length; i++)
-            addJoin(segments[i], join);
-        if (closed) {
-            // Go back to the beginning
-            addJoin(segments[0], join);
-        } else if (length > 0) {
-            // Handle caps on open paths
-            addCap(segments[0], cap);
-            addCap(segments[segments.length - 1], cap);
+        if (length > 0) {
+            for (var i = 1; i < length; i++) {
+                addJoin(segments[i], join);
+            }
+            if (closed) {
+                // Go back to the beginning
+                addJoin(segments[0], join);
+            } else {
+                // Handle caps on open paths
+                addCap(segments[0], cap);
+                addCap(segments[segments.length - 1], cap);
+            }
         }
         return bounds;
     },
@@ -2846,8 +2866,9 @@ statics: {
             normal1 = curve1.getNormalAtTime(1).multiply(radius)
                 .transform(strokeMatrix),
             normal2 = curve2.getNormalAtTime(0).multiply(radius)
-                .transform(strokeMatrix);
-        if (normal1.getDirectedAngle(normal2) < 0) {
+                .transform(strokeMatrix),
+                angle = normal1.getDirectedAngle(normal2);
+        if (angle < 0 || angle >= 180) {
             normal1 = normal1.negate();
             normal2 = normal2.negate();
         }
