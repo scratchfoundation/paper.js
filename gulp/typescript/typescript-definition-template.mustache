@@ -1,0 +1,65 @@
+/*!
+ * Paper.js v{{version}} - The Swiss Army Knife of Vector Graphics Scripting.
+ * http://paperjs.org/
+ *
+ * Copyright (c) 2011 - 2020, Jürg Lehni & Jonathan Puckey
+ * http://juerglehni.com/ & https://puckey.studio/
+ *
+ * Distributed under the MIT license. See LICENSE file for details.
+ *
+ * All rights reserved.
+ *
+ * Date: {{date}}
+ *
+ * This is an auto-generated type definition.
+ */
+
+declare namespace paper {
+    {{#classes}}
+
+    {{#doc}}4{{/doc}}
+    class {{className}} {{#extends}}extends {{extends}}{{/extends}} {
+        {{#properties}}
+        {{#doc}}8{{/doc}}
+        {{static}}{{readOnly}}{{name}}{{type}}
+
+        {{/properties}}
+        {{#classesPointers}}
+        {{name}}: typeof {{name}}
+        {{/classesPointers}}
+
+        {{#methods}}
+        {{#doc}}8{{/doc}}
+        {{static}}{{name}}({{params}}){{type}}
+
+        {{/methods}}
+    }
+    {{#hasStaticConstructors}}
+    namespace {{className}} {
+        {{#staticConstructors}}
+
+        class {{name}} extends {{className}} {
+            {{#constructors}}
+            {{#doc}}12{{/doc}}
+            constructor({{params}})
+
+            {{/constructors}}
+        }
+        {{/staticConstructors}}
+    }
+    {{/hasStaticConstructors}}
+    {{/classes}}
+}
+
+
+declare module 'paper/dist/paper-core'
+{
+    const paperCore: Pick<paper.PaperScope, Exclude<keyof paper.PaperScope, 'PaperScript'>>;
+    export = paperCore
+}
+
+declare module 'paper'
+{
+    const paperFull: paper.PaperScope;
+    export = paperFull
+}

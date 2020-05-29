@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & http://jonathanpuckey.com/
+ * Copyright (c) 2011 - 2020, Jürg Lehni & Jonathan Puckey
+ * http://juerglehni.com/ & https://puckey.studio/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -45,7 +45,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
             // Generate an id for this view / element if it does not have one
             this._id = element.getAttribute('id');
             if (this._id == null)
-                element.setAttribute('id', this._id = 'view-' + View._id++);
+                element.setAttribute('id', this._id = 'paper-view-' + View._id++);
             // Install event handlers
             DomEvent.add(element, this._viewEvents);
             // Borrowed from Hammer.js:
@@ -480,8 +480,9 @@ var View = Base.extend(Emitter, /** @lends View# */{
 }, Base.each(['rotate', 'scale', 'shear', 'skew'], function(key) {
     var rotate = key === 'rotate';
     this[key] = function(/* value, center */) {
-        var value = (rotate ? Base : Point).read(arguments),
-            center = Point.read(arguments, 0, { readNull: true });
+        var args = arguments,
+            value = (rotate ? Base : Point).read(args),
+            center = Point.read(args, 0, { readNull: true });
         return this.transform(new Matrix()[key](value,
                 center || this.getCenter(true)));
     };
@@ -522,7 +523,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @bean
      * @type Number
-     * @see #getScaling()
+     * @see #scaling
      */
     getZoom: function() {
         var scaling = this._decompose().scaling;
@@ -559,7 +560,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @bean
      * @type Point
-     * @see #getZoom()
+     * @see #zoom
      */
     getScaling: function() {
         var scaling = this._decompose().scaling;
@@ -632,7 +633,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#shear
      * @function
-     * @param {Point} shear the horziontal and vertical shear factors as a point
+     * @param {Point} shear the horizontal and vertical shear factors as a point
      * @param {Point} [center={@link View#center}]
      * @see Matrix#shear(shear[, center])
      */
@@ -654,7 +655,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#skew
      * @function
-     * @param {Point} skew the horziontal and vertical skew angles in degrees
+     * @param {Point} skew the horizontal and vertical skew angles in degrees
      * @param {Point} [center={@link View#center}]
      * @see Matrix#shear(skew[, center])
      */
@@ -746,7 +747,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onFrame
      * @property
-     * @type Function
+     * @type ?Function
      * @see Item#onFrame
      *
      * @example {@paperscript}
@@ -768,7 +769,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onResize
      * @property
-     * @type Function
+     * @type ?Function
      *
      * @example
      * // Repositioning items when a view is resized:
@@ -793,7 +794,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onMouseDown
      * @property
-     * @type Function
+     * @type ?Function
      * @see Item#onMouseDown
      */
 
@@ -807,7 +808,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onMouseDrag
      * @property
-     * @type Function
+     * @type ?Function
      * @see Item#onMouseDrag
      */
 
@@ -818,7 +819,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onMouseUp
      * @property
-     * @type Function
+     * @type ?Function
      * @see Item#onMouseUp
      */
 
@@ -832,7 +833,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onClick
      * @property
-     * @type Function
+     * @type ?Function
      * @see Item#onClick
      */
 
@@ -846,7 +847,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onDoubleClick
      * @property
-     * @type Function
+     * @type ?Function
      * @see Item#onDoubleClick
      */
 
@@ -860,7 +861,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onMouseMove
      * @property
-     * @type Function
+     * @type ?Function
      * @see Item#onMouseMove
      */
 
@@ -875,7 +876,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onMouseEnter
      * @property
-     * @type Function
+     * @type ?Function
      * @see Item#onMouseEnter
      */
 
@@ -889,7 +890,7 @@ var View = Base.extend(Emitter, /** @lends View# */{
      *
      * @name View#onMouseLeave
      * @property
-     * @type Function
+     * @type ?Function
      * @see View#onMouseLeave
      */
 
@@ -1496,7 +1497,7 @@ new function() { // Injection scope for event handling on the browser
             updateFocus: updateFocus,
 
             /**
-             * Clear all events handling state informations. Made for testing
+             * Clear all events handling state information. Made for testing
              * purpose, to have a way to start with a fresh state before each
              * test.
              * @private

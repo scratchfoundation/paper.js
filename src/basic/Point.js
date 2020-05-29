@@ -2,8 +2,8 @@
  * Paper.js - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
- * Copyright (c) 2011 - 2016, Juerg Lehni & Jonathan Puckey
- * http://scratchdisk.com/ & http://jonathanpuckey.com/
+ * Copyright (c) 2011 - 2020, Jürg Lehni & Jonathan Puckey
+ * http://juerglehni.com/ & https://puckey.studio/
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -170,6 +170,8 @@ var Point = Base.extend(/** @lends Point# */{
      * for calls of `set()`.
      *
      * @function
+     * @param {...*} values
+     * @return {Point}
      */
     set: '#initialize',
 
@@ -431,11 +433,12 @@ var Point = Base.extend(/** @lends Point# */{
      * @return {Number}
      */
     getDistance: function(/* point, squared */) {
-        var point = Point.read(arguments),
+        var args = arguments,
+            point = Point.read(args),
             x = point.x - this.x,
             y = point.y - this.y,
             d = x * x + y * y,
-            squared = Base.read(arguments);
+            squared = Base.read(args);
         return squared ? d : Math.sqrt(d);
     },
 
@@ -709,8 +712,9 @@ var Point = Base.extend(/** @lends Point# */{
      * @return {Boolean} {@true if it is within the given distance}
      */
     isClose: function(/* point, tolerance */) {
-        var point = Point.read(arguments),
-            tolerance = Base.read(arguments);
+        var args = arguments,
+            point = Point.read(args),
+            tolerance = Base.read(args);
         return this.getDistance(point) <= tolerance;
     },
 
@@ -768,7 +772,7 @@ var Point = Base.extend(/** @lends Point# */{
      *
      * @param {Number} quadrant the quadrant to check against
      * @return {Boolean} {@true if either x or y are not a number}
-     * @see #getQuadrant()
+     * @see #quadrant
      */
     isInQuadrant: function(q) {
         // Map quadrant to x & y coordinate pairs and multiply with coordinates,
@@ -935,8 +939,9 @@ var Point = Base.extend(/** @lends Point# */{
          * [point1, point2, point3].reduce(Point.min) // {x: 60, y: 5}
          */
         min: function(/* point1, point2 */) {
-            var point1 = Point.read(arguments),
-                point2 = Point.read(arguments);
+            var args = arguments,
+                point1 = Point.read(args),
+                point2 = Point.read(args);
             return new Point(
                 Math.min(point1.x, point2.x),
                 Math.min(point1.y, point2.y)
@@ -966,8 +971,9 @@ var Point = Base.extend(/** @lends Point# */{
          * [point1, point2, point3].reduce(Point.max) // {x: 250, y: 100}
          */
         max: function(/* point1, point2 */) {
-            var point1 = Point.read(arguments),
-                point2 = Point.read(arguments);
+            var args = arguments,
+                point1 = Point.read(args),
+                point2 = Point.read(args);
             return new Point(
                 Math.max(point1.x, point2.x),
                 Math.max(point1.y, point2.y)

@@ -1,12 +1,12 @@
 ## Authors
 
 - Jürg Lehni <juerg@scratchdisk.com>
-- Jonathan Puckey <jonathan@studiomoniker.com>
+- Jonathan Puckey <jonathan@puckey.studio>
 
 ## Contributors
 
 - Harikrishnan Gopalakrishnan <hari.exeption@gmail.com>
-- Jan Bösenberg <development@iconexperience.com>
+- Jan Bösenberg <jan.boesenberg@gmail.com>
 - Jt Whissel <jtwhissel@gmail.com>
 - Andrew Roles <jaroles58@gmail.com>
 - Jacob Lites <jnightlight@gmail.com>
