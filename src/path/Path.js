@@ -1665,9 +1665,8 @@ var Path = PathItem.extend(/** @lends Path# */{
             strokePadding = tolerancePadding,
             join, cap, miterLimit,
             area, loc, res,
-            hitStroke = options.stroke && style.hasStroke(),
-            hitFill = options.hitUnfilledPaths
-                ? options.fill : options.fill && style.hasFill(),
+            hitStroke = options.stroke && (style.hasStroke() || options.hitUnstrokedPaths),
+            hitFill = options.fill && (style.hasFill() || options.hitUnfilledPaths),
             hitCurves = options.curves,
             strokeRadius = hitStroke
                     ? style.getStrokeWidth() / 2
