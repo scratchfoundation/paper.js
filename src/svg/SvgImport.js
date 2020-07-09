@@ -445,8 +445,6 @@ new function() {
     }, {}), {
         id: function(item, value) {
             definitions[value] = item;
-            if (item.setName)
-                item.setName(value);
         },
 
         'clip-path': function(item, value) {

@@ -168,6 +168,16 @@ test('Import SVG string with leading line-breaks', function() {
     }));
 });
 
+test('Import SVG with numeric ID', function() {
+    paper.project.importSVG(createSVG('circle', {
+        cx: 100,
+        cy: 100,
+        r: 50,
+        id: '1'
+    }));
+    ok(true, 'Imports SVG with a numeric element ID without throwing.');
+});
+
 function importSVG(assert, url, message, options) {
     var done = assert.async();
     project.importSVG(url, {
