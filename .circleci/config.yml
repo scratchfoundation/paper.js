@@ -35,21 +35,20 @@ commands:
 
 jobs:
   default:
-    executor:
-      name: node/default
-      tag: lts-browsers
-    environment:
-      CXX: "g++-4.9"
+    docker:
+      - image: circleci/node:10-browsers # TODO: switch to cimg/node:* after upgrading gulp
     steps:
       - checkout
       - run:
           name: Setup
           command: |
+            sudo apt update
+            sudo apt install libgif-dev
             travis/setup-git.sh
             travis/install-assets.sh
             npm set progress=false
             which gulp || sudo npm install -g gulp-cli
-      - run: npm install # TODO: node/install-packages
+      - run: npm install # TODO: switch to node/install-packages after adding package_lock.json
       - run:
           name: Build & Test
           command: |
