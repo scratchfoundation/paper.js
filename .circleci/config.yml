@@ -48,7 +48,7 @@ jobs:
             travis/setup-git.sh
             travis/install-assets.sh
             npm set progress=false
-            which gulp || npm install -g gulp-cli
+            which gulp || sudo npm install -g gulp-cli
       - node/install-packages
       - run:
           name: Build & Test
