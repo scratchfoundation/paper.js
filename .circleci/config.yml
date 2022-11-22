@@ -35,7 +35,9 @@ commands:
 
 jobs:
   default:
-    executor: node/default
+    executor:
+      name: node/default
+      tag: lts-browsers
     environment:
       CXX: "g++-4.9"
     steps:
