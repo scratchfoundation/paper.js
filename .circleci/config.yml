@@ -1,0 +1,67 @@
+version: 2.1
+orbs:
+  node: circleci/node@5
+commands:
+  deploy_npm:
+    steps:
+      - when:
+          condition:
+            or:
+              - equal: [ master, <<pipeline.git.branch>> ]
+              - equal: [ develop, <<pipeline.git.branch>> ]
+              - matches: { pattern: "^hotfix.*", value: <<pipeline.git.branch>> }
+              - matches: { pattern: "^release.*", value: <<pipeline.git.branch>> }
+          steps:
+            - run:
+                # This relies on deploy_gh_pages to set git user info first
+                name: Deploy to NPM
+                command: |
+                  export RELEASE_VERSION="0.11.$(date +%Y%m%d%H%M%S)"
+                  if [[ "$CIRCLE_BRANCH" == hotfix/* ]]; then
+                    export NPM_TAG=hotfix
+                  else
+                    export NPM_TAG=latest
+                  fi
+                  echo "Deploying version $RELEASE_VERSION to $NPM_TAG"
+                  npm --no-git-tag-version version $RELEASE_VERSION
+                  npm set //registry.npmjs.org/:_authToken=$NPM_TOKEN
+                  npm publish --tag $NPM_TAG
+                  if npm info | grep -q $RELEASE_VERSION; then
+                    git tag $RELEASE_VERSION
+                    git push \
+                      https://${GH_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git \
+                      $RELEASE_VERSION
+                  fi
+
+jobs:
+  default:
+    executor: node/default
+    environment:
+      CXX: "g++-4.9"
+    steps:
+      - checkout
+      - run:
+          name: Setup
+          command: |
+            travis/setup-git.sh
+            travis/install-assets.sh
+            npm set progress=false
+            which gulp || npm install -g gulp-cli
+      - node/install-packages
+      - run:
+          name: Build & Test
+          command: |
+            gulp jshint
+            gulp minify
+            gulp test
+            gulp zip
+            [ "${TRAVIS_BRANCH}" = "develop" ] && [ "${TRAVIS_NODE_VERSION}" = "stable" ] && travis/deploy-prebuilt.sh || true
+      - deploy_npm
+workflows:
+  version: 2
+  default:
+    jobs:
+      - default:
+          context:
+            - dockerhub-credentials
+            - scratch-npm-creds
