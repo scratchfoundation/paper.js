@@ -41,7 +41,7 @@ jobs:
             travis/install-assets.sh
             npm set progress=false
             which gulp || sudo npm install -g gulp-cli
-      - run: npm install # TODO: switch to node/install-packages after adding package_lock.json
+      - node/install-packages
       - run: gulp jshint
       - run: gulp minify
       - run: gulp test
