@@ -5,7 +5,7 @@ commands:
   deploy_npm:
     steps:
       - run:
-          # This relies on deploy_gh_pages to set git user info first
+          # This assumes the git user info is already configured
           name: Deploy to NPM
           command: |
               export RELEASE_VERSION="0.11.$(date +%Y%m%d%H%M%S)"
@@ -37,7 +37,7 @@ jobs:
           command: |
             sudo apt update
             sudo apt install libgif-dev
-            TRAVIS_BRANCH="${CIRCLECI_BRANCH}" travis/setup-git.sh
+            TRAVIS_BRANCH="${CIRCLECI_BRANCH}" travis/setup-git.sh # Configure git user info
             travis/install-assets.sh
             npm set progress=false
             which gulp || sudo npm install -g gulp-cli
