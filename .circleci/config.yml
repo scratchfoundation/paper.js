@@ -31,6 +31,7 @@ jobs:
       - image: circleci/node:10-browsers # TODO: switch to cimg/node:* after upgrading gulp
     steps:
       - checkout
+      - run: git submodule update --init --recursive
       - run:
           name: Setup
           command: |
