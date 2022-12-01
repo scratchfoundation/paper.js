@@ -4914,26 +4914,35 @@ for (var i = 0; i < 20; i++) {
 	
 <div id="rasterize" class="member">
 <div class="member-link">
-<a name="rasterize" href="#rasterize"><tt><b>rasterize</b>([options])</tt></a>
+<a name="rasterize" href="#rasterize"><tt><b>rasterize</b>([resolution[, insert[, boundRect]]])</tt></a>
 </div>
 <div class="member-description hidden">
 <div class="member-text">
 	<p>Rasterizes the item into a newly created Raster object. The item itself is not removed after rasterization.</p>
-    <ul class="member-list">
-<h4>Options:</h4>
-<li><tt>resolution: <tt>Number</tt></tt> &mdash; the desired resolution to  be used when rasterizing, in pixels per inch (DPI). If not specified,  the value of <code>view.resolution</code> is used by default. &mdash;&nbsp;default: <tt>view.resolution</tt></li>
-<li><tt>raster: <a href="../classes/Raster.html"><tt>Raster</tt></a></tt> &mdash; specifies a raster to be reused when  rasterizing. If the raster has the desired size already, then the  underlying canvas is reused and no new memory needs to be allocated.  If no raster is provided, a new raster item is created and returned  instead. &mdash;&nbsp;default: <tt>null</tt></li>
-<li><tt>insert: <tt>Boolean</tt></tt> &mdash; specifies whether the raster should be  inserted into the scene graph. When set to <code>true</code>, it is inserted  above the rasterized item. &mdash;&nbsp;default: <tt>true</tt></li>
-</ul>
+    
 	
 <ul class="member-list">
 	<h4>Parameters:</h4>
 	
 	<li>
-<tt>options:</tt> 
-<tt>Object</tt>
-&mdash;&nbsp;the rasterization options
-&mdash;&nbsp;optional, default: <tt>{}</tt>
+<tt>resolution:</tt> 
+<tt>Number</tt>
+&mdash;&nbsp;the resolution of the raster  in pixels per inch (DPI). If not specified, the value of  <code>view.resolution</code> is used.
+&mdash;&nbsp;optional, default: <tt>view.resolution</tt>
+</li>
+	
+	<li>
+<tt>insert:</tt> 
+<tt>Boolean</tt>
+&mdash;&nbsp;specifies whether the raster should be  inserted into the scene graph. When set to <code>true</code>, it is inserted  above the original
+&mdash;&nbsp;optional, default: <tt>true</tt>
+</li>
+	
+	<li>
+<tt>boundRect:</tt> 
+<a href="../classes/Rectangle.html"><tt>Rectangle</tt></a>
+&mdash;&nbsp;bounds within which to rasterize. Defaults  to stroke bounds.
+&mdash;&nbsp;optional
 </li>
 	
 </ul>
@@ -4943,7 +4952,7 @@ for (var i = 0; i < 20; i++) {
 		<h4>Returns:</h4>
 		
 			<li>
-<tt><a href="../classes/Raster.html"><tt>Raster</tt></a></tt>&nbsp;&mdash;&nbsp;the reused raster or the newly created raster item
+<tt><a href="../classes/Raster.html"><tt>Raster</tt></a></tt>&nbsp;&mdash;&nbsp;the newly created raster item
 </li>
 
 		
@@ -5169,6 +5178,8 @@ function onMouseDown(event) {
 <li><tt>options.bounds: <tt>Boolean</tt></tt> &mdash; hit-test the corners and side-centers of  the bounding rectangle of items (<a href="../classes/Item.html#bounds"><tt>item.bounds</tt></a>)</li>
 <li><tt>options.guides: <tt>Boolean</tt></tt> &mdash; hit-test items that have <tt>Item#guide</tt> set to <code>true</code></li>
 <li><tt>options.selected: <tt>Boolean</tt></tt> &mdash; only hit selected items</li>
+<li><tt>options.hitUnfilledPaths: <tt>Boolean</tt></tt> &mdash; Allow hitting null or alpha 0  fills for paths</li>
+<li><tt>options.hitUnstrokedPaths: <tt>Boolean</tt></tt> &mdash; Allow hitting null or alpha 0  strokes for paths</li>
 </ul>
 	
 <ul class="member-list">
@@ -5384,9 +5395,9 @@ function onMouseDown(event) {
 <h4>Options:</h4>
 <li><tt>options.recursive: <tt>Boolean</tt></tt> &mdash; whether to loop recursively  through all children, or stop at the current level &mdash;&nbsp;default: <tt>true</tt></li>
 <li><tt>options.match: <tt>Function</tt></tt> &mdash; a match function to be called for each  item, allowing the definition of more flexible item checks that are  not bound to properties. If no other match properties are defined,  this function can also be passed instead of the <code>options</code> object</li>
-<li><tt>options.class: <tt>Function</tt></tt> &mdash; the constructor function of the item  type to match against</li>
-<li><tt>options.inside: <a href="../classes/Rectangle.html"><tt>Rectangle</tt></a></tt> &mdash; the rectangle in which the items need  to be fully contained</li>
-<li><tt>options.overlapping: <a href="../classes/Rectangle.html"><tt>Rectangle</tt></a></tt> &mdash; the rectangle with which the  items need to at least partly overlap</li>
+<li><tt>options.class: <tt>Function</tt></tt> &mdash; the constructor function of the item type  to match against</li>
+<li><tt>options.inside: <a href="../classes/Rectangle.html"><tt>Rectangle</tt></a></tt> &mdash; the rectangle in which the items need to  be fully contained</li>
+<li><tt>options.overlapping: <a href="../classes/Rectangle.html"><tt>Rectangle</tt></a></tt> &mdash; the rectangle with which the items  need to at least partly overlap</li>
 </ul>
 	
 <ul class="member-list">
@@ -5428,9 +5439,9 @@ function onMouseDown(event) {
 </div>
 
 	
-<div id="getitem-options" class="member">
+<div id="getitem-match" class="member">
 <div class="member-link">
-<a name="getitem-options" href="#getitem-options"><tt><b>getItem</b>(options)</tt></a>
+<a name="getitem-match" href="#getitem-match"><tt><b>getItem</b>(match)</tt></a>
 </div>
 <div class="member-description hidden">
 <div class="member-text">
@@ -5441,7 +5452,7 @@ function onMouseDown(event) {
 	<h4>Parameters:</h4>
 	
 	<li>
-<tt>options:</tt> 
+<tt>match:</tt> 
 <tt>Object</tt>⟋<tt>Function</tt>
 &mdash;&nbsp;the criteria to match against
 
@@ -5466,7 +5477,7 @@ function onMouseDown(event) {
 	<ul class="member-list">
 		<h4>See also:</h4>
 		
-			<li><tt><a href="../classes/Item.html#getitems-options"><tt>getItems(options)</tt></a></tt></li>
+			<li><tt><a href="../classes/Item.html#getitems-match"><tt>getItems(match)</tt></a></tt></li>
 		
 	</ul>
 
@@ -8630,8 +8641,8 @@ path.tweenFrom({ fillColor: 'red' }, { duration: 1000 });
 
 <!-- =========================== copyright notice ========================== -->
 <p class="footer">
-Paper.js v0.12.15 (develop)<br>
-Copyright &#169; 2011—2021 <a href="http://www.lehni.org" target="_blank">J&uuml;rg Lehni</a> &amp; <a href="http://www.jonathanpuckey.com" target="_blank">Jonathan Puckey</a>. All Rights Reserved.</p>
+Paper.js v0.12.7<br>
+Copyright &#169; 2011—2022 <a href="http://www.lehni.org" target="_blank">J&uuml;rg Lehni</a> &amp; <a href="http://www.jonathanpuckey.com" target="_blank">Jonathan Puckey</a>. All Rights Reserved.</p>
 <div class="content-end"></div>
 
 

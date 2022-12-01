@@ -13,5 +13,6 @@
 - Justin Ridgewell <justinridgewell@gmail.com>
 - Andrew Wagenheim <abwagenheim@gmail.com>
 - Scott Kieronski <baroes0239@gmail.com>
+- DD Liu <liudi@media.mit.edu>
 - Samuel Asensi <asensi.samuel@gmail.com>
 - Takahiro Nishino <sapics.dev@gmail.com>

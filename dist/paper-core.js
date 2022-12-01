@@ -1,5 +1,5 @@
 /*!
- * Paper.js v0.12.15-develop - The Swiss Army Knife of Vector Graphics Scripting.
+ * Paper.js v0.12.7 - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
  *
  * Copyright (c) 2011 - 2020, Jürg Lehni & Jonathan Puckey
@@ -9,7 +9,7 @@
  *
  * All rights reserved.
  *
- * Date: Mon Mar 22 17:03:39 2021 +0100
+ * Date: Thu Dec 1 12:02:03 2022 -0800
  *
  ***
  *
@@ -33,7 +33,7 @@
 var paper = function(self, undefined) {
 
 self = self || require('./node/self.js');
-var window = self.window,
+var window = self.window ? self.window : self,
 	document = self.document;
 
 var Base = new function() {
@@ -821,7 +821,7 @@ var PaperScope = Base.extend({
 		}
 	},
 
-	version: "0.12.15-develop",
+	version: "0.12.7",
 
 	getView: function() {
 		var project = this.project;
@@ -3452,7 +3452,8 @@ new function() {
 }, Base.each({
 		getStrokeBounds: { stroke: true },
 		getHandleBounds: { handle: true },
-		getInternalBounds: { internal: true }
+		getInternalBounds: { internal: true },
+		getDrawnBounds: { stroke: true, drawnTextBounds: true },
 	},
 	function(options, key) {
 		this[key] = function(matrix) {
@@ -3509,6 +3510,7 @@ new function() {
 		return [
 			options.stroke ? 1 : 0,
 			options.handle ? 1 : 0,
+			options.drawnTextBounds? 1 : 0,
 			internal ? 1 : 0
 		].join('');
 	},
@@ -3657,25 +3659,15 @@ new function() {
 			var rotation = this.getRotation(),
 				decomposed = this._decomposed,
 				matrix = new Matrix(),
-				isZero = Numerical.isZero;
-			if (isZero(current.x) || isZero(current.y)) {
-				matrix.translate(decomposed.translation);
-				if (rotation) {
-					matrix.rotate(rotation);
-				}
-				matrix.scale(scaling.x, scaling.y);
-				this._matrix.set(matrix);
-			} else {
-				var center = this.getPosition(true);
-				matrix.translate(center);
-				if (rotation)
-					matrix.rotate(rotation);
-				matrix.scale(scaling.x / current.x, scaling.y / current.y);
-				if (rotation)
-					matrix.rotate(-rotation);
-				matrix.translate(center.negate());
-				this.transform(matrix);
-			}
+				center = this.getPosition(true);
+			matrix.translate(center);
+			if (rotation)
+				matrix.rotate(rotation);
+			matrix.scale(scaling.x / current.x, scaling.y / current.y);
+			if (rotation)
+				matrix.rotate(-rotation);
+			matrix.translate(center.negate());
+			this.transform(matrix);
 			if (decomposed) {
 				decomposed.scaling = scaling;
 				this._decomposed = decomposed;
@@ -3689,7 +3681,7 @@ new function() {
 
 	setMatrix: function() {
 		var matrix = this._matrix;
-		matrix.set.apply(matrix, arguments);
+		matrix.initialize.apply(matrix, arguments);
 	},
 
 	getGlobalMatrix: function(_dontClone) {
@@ -3888,45 +3880,28 @@ new function() {
 			this.setName(name);
 	},
 
-	rasterize: function(arg0, arg1) {
-		var resolution,
-			insert,
-			raster;
-		if (Base.isPlainObject(arg0)) {
-			resolution = arg0.resolution;
-			insert = arg0.insert;
-			raster = arg0.raster;
-		} else {
-			resolution = arg0;
-			insert = arg1;
-		}
-		if (!raster) {
-			raster = new Raster(Item.NO_INSERT);
-		}
-		var bounds = this.getStrokeBounds(),
+	rasterize: function(resolution, insert, boundRect) {
+		var bounds = boundRect ? boundRect : this.getStrokeBounds(),
 			scale = (resolution || this.getView().getResolution()) / 72,
 			topLeft = bounds.getTopLeft().floor(),
 			bottomRight = bounds.getBottomRight().ceil(),
-			boundsSize = new Size(bottomRight.subtract(topLeft)),
-			rasterSize = boundsSize.multiply(scale);
-		raster.setSize(rasterSize, true);
-
-		if (!rasterSize.isZero()) {
-			var ctx = raster.getContext(true),
+			size = new Size(bottomRight.subtract(topLeft)),
+			raster = new Raster(Item.NO_INSERT);
+		if (!size.isZero()) {
+			var canvas = CanvasProvider.getCanvas(size.multiply(scale)),
+				ctx = canvas.getContext('2d'),
 				matrix = new Matrix().scale(scale).translate(topLeft.negate());
+			ctx.imageSmoothingEnabled = false;
 			ctx.save();
 			matrix.applyToContext(ctx);
 			this.draw(ctx, new Base({ matrices: [matrix] }));
 			ctx.restore();
+			raster.setCanvas(canvas);
 		}
-		raster._matrix.set(
-			new Matrix()
-				.translate(topLeft.add(boundsSize.divide(2)))
-				.scale(1 / scale)
-		);
-		if (insert === undefined || insert) {
+		raster.transform(new Matrix().translate(topLeft.add(size.divide(2)))
+				.scale(1 / scale));
+		if (insert === undefined || insert)
 			raster.insertAbove(this);
-		}
 		return raster;
 	},
 
@@ -4646,14 +4621,14 @@ new function() {
 	}
 }), {
 
-	_setStyles: function(ctx, param, viewMatrix) {
+	_setStyles: function(ctx, param, viewMatrix, strokeMatrix) {
 		var style = this._style,
 			matrix = this._matrix;
 		if (style.hasFill()) {
-			ctx.fillStyle = style.getFillColor().toCanvasStyle(ctx, matrix);
+			ctx.fillStyle = style.getFillColor().toCanvasStyle(ctx, matrix, strokeMatrix);
 		}
 		if (style.hasStroke()) {
-			ctx.strokeStyle = style.getStrokeColor().toCanvasStyle(ctx, matrix);
+			ctx.strokeStyle = style.getStrokeColor().toCanvasStyle(ctx, matrix, strokeMatrix);
 			ctx.lineWidth = style.getStrokeWidth();
 			var strokeJoin = style.getStrokeJoin(),
 				strokeCap = style.getStrokeCap(),
@@ -4805,6 +4780,7 @@ new function() {
 				half = size / 2;
 			ctx.strokeStyle = ctx.fillStyle = color
 					? color.toCanvasStyle(ctx) : '#009dec';
+			ctx.lineWidth=2.5;
 			if (itemSelected)
 				this._drawSelected(ctx, mx, selectionItems);
 			if (positionSelected) {
@@ -5197,7 +5173,7 @@ var Shape = Item.extend({
 			ctx.closePath();
 		}
 		if (!dontPaint && (hasFill || hasStroke)) {
-			this._setStyles(ctx, param, viewMatrix);
+			this._setStyles(ctx, param, viewMatrix, strokeMatrix);
 			if (hasFill) {
 				ctx.fill(style.getFillRule());
 				ctx.shadowColor = 'rgba(0,0,0,0)';
@@ -5360,7 +5336,7 @@ var Raster = Item.extend({
 		source: null
 	},
 	_prioritize: ['crossOrigin'],
-	_smoothing: 'low',
+	_smoothing: false,
 	beans: true,
 
 	initialize: function Raster(source, position) {
@@ -5418,23 +5394,20 @@ var Raster = Item.extend({
 				this, 'setSize');
 	},
 
-	setSize: function(_size, _clear) {
+	setSize: function() {
 		var size = Size.read(arguments);
 		if (!size.equals(this._size)) {
 			if (size.width > 0 && size.height > 0) {
-				var element = !_clear && this.getElement();
+				var element = this.getElement();
 				this._setImage(CanvasProvider.getCanvas(size));
-				if (element) {
+				if (element)
 					this.getContext(true).drawImage(element, 0, 0,
 							size.width, size.height);
-				}
 			} else {
 				if (this._canvas)
 					CanvasProvider.release(this._canvas);
 				this._size = size.clone();
 			}
-		} else if (_clear) {
-			this.clear();
 		}
 	},
 
@@ -5587,9 +5560,7 @@ var Raster = Item.extend({
 	},
 
 	setSmoothing: function(smoothing) {
-		this._smoothing = typeof smoothing === 'string'
-			? smoothing
-			: smoothing ? 'low' : 'off';
+		this._smoothing = smoothing;
 		this._changed(257);
 	},
 
@@ -5602,8 +5573,16 @@ var Raster = Item.extend({
 	getSubCanvas: function() {
 		var rect = Rectangle.read(arguments),
 			ctx = CanvasProvider.getContext(rect.getSize());
-		ctx.drawImage(this.getCanvas(), rect.x, rect.y,
-				rect.width, rect.height, 0, 0, rect.width, rect.height);
+		var clippedStartX = Math.max(0, rect.x);
+		var clippedStartY = Math.max(0, rect.y);
+		var clippedEndX = Math.min(this.getCanvas().width, rect.x + rect.width);
+		var clippedEndY = Math.min(this.getCanvas().height, rect.y + rect.height);
+		ctx.drawImage(this.getCanvas(),
+			clippedStartX, clippedStartY,
+			clippedEndX - clippedStartX, clippedEndY - clippedStartY,
+			clippedStartX - rect.x, clippedStartY - rect.y,
+			clippedEndX - clippedStartX, clippedEndY - clippedStartY
+		);
 		return ctx.canvas;
 	},
 
@@ -5728,14 +5707,9 @@ var Raster = Item.extend({
 				rect.width, rect.height);
 	},
 
-	putImageData: function(data ) {
+	setImageData: function(data ) {
 		var point = Point.read(arguments, 1);
 		this.getContext(true).putImageData(data, point.x, point.y);
-	},
-
-	setImageData: function(data) {
-		this.setSize(data);
-		this.getContext(true).putImageData(data, 0, 0);
 	},
 
 	_getBounds: function(matrix, options) {
@@ -5764,12 +5738,8 @@ var Raster = Item.extend({
 
 			this._setStyles(ctx, param, viewMatrix);
 
-			var smoothing = this._smoothing,
-				disabled = smoothing === 'off';
 			DomElement.setPrefixed(
-				ctx,
-				disabled ? 'imageSmoothingEnabled' : 'imageSmoothingQuality',
-				disabled ? false : smoothing
+				ctx, 'imageSmoothingEnabled', this._smoothing
 			);
 
 			ctx.drawImage(element,
@@ -6839,13 +6809,13 @@ statics: {
 		}
 
 		padding /= 2;
-		var minPad = min[coord] + padding,
-			maxPad = max[coord] - padding;
+		var minPad = min[coord] - padding,
+			maxPad = max[coord] + padding;
 		if (    v0 < minPad || v1 < minPad || v2 < minPad || v3 < minPad ||
 				v0 > maxPad || v1 > maxPad || v2 > maxPad || v3 > maxPad) {
 			if (v1 < v0 != v1 < v3 && v2 < v0 != v2 < v3) {
-				add(v0, 0);
-				add(v3, 0);
+				add(v0, padding);
+				add(v3, padding);
 			} else {
 				var a = 3 * (v1 - v2) - v0 + v3,
 					b = 2 * (v0 + v2) - 4 * v1,
@@ -9169,8 +9139,8 @@ var Path = PathItem.extend({
 			strokePadding = tolerancePadding,
 			join, cap, miterLimit,
 			area, loc, res,
-			hitStroke = options.stroke && style.hasStroke(),
-			hitFill = options.fill && style.hasFill(),
+			hitStroke = options.stroke && (style.hasStroke() || options.hitUnstrokedPaths),
+			hitFill = options.fill && (style.hasFill() || options.hitUnfilledPaths),
 			hitCurves = options.curves,
 			strokeRadius = hitStroke
 					? style.getStrokeWidth() / 2
@@ -9358,12 +9328,10 @@ var Path = PathItem.extend({
 }),
 new function() {
 
-	function drawHandles(ctx, segments, matrix, size) {
+	function drawHandles(ctx, segments, matrix, size, isFullySelected) {
 		if (size <= 0) return;
 
 		var half = size / 2,
-			miniSize = size - 2,
-			miniHalf = half - 1,
 			coords = new Array(6),
 			pX, pY;
 
@@ -9374,10 +9342,12 @@ new function() {
 				ctx.beginPath();
 				ctx.moveTo(pX, pY);
 				ctx.lineTo(hX, hY);
+				ctx.moveTo(hX - half, hY);
+				ctx.lineTo(hX, hY + half);
+				ctx.lineTo(hX + half, hY);
+				ctx.lineTo(hX, hY - half);
+				ctx.closePath();
 				ctx.stroke();
-				ctx.beginPath();
-				ctx.arc(hX, hY, half, 0, Math.PI * 2, true);
-				ctx.fill();
 			}
 		}
 
@@ -9387,17 +9357,19 @@ new function() {
 			segment._transformCoordinates(matrix, coords);
 			pX = coords[0];
 			pY = coords[1];
-			if (selection & 2)
+			if (selection & 2 && !isFullySelected)
 				drawHandle(2);
-			if (selection & 4)
+			if (selection & 4 && !isFullySelected)
 				drawHandle(4);
-			ctx.fillRect(pX - half, pY - half, size, size);
-			if (miniSize > 0 && !(selection & 1)) {
-				var fillStyle = ctx.fillStyle;
-				ctx.fillStyle = '#ffffff';
-				ctx.fillRect(pX - miniHalf, pY - miniHalf, miniSize, miniSize);
-				ctx.fillStyle = fillStyle;
+			ctx.beginPath();
+			ctx.arc(pX, pY, half, 0, Math.PI * 2, true);
+			ctx.stroke();
+			var fillStyle = ctx.fillStyle;
+			if (!(selection & 1)) {
+				ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
 			}
+			ctx.fill();
+			ctx.fillStyle = fillStyle;
 		}
 	}
 
@@ -9483,7 +9455,7 @@ new function() {
 			}
 
 			if (!dontPaint && (hasFill || hasStroke)) {
-				this._setStyles(ctx, param, viewMatrix);
+				this._setStyles(ctx, param, viewMatrix, strokeMatrix);
 				if (hasFill) {
 					ctx.fill(style.getFillRule());
 					ctx.shadowColor = 'rgba(0,0,0,0)';
@@ -9497,6 +9469,7 @@ new function() {
 							length = flattener.length,
 							from = -style.getDashOffset(), to,
 							i = 0;
+						from = from % length;
 						while (from > 0) {
 							from -= getOffset(i--) + getOffset(i--);
 						}
@@ -9517,7 +9490,8 @@ new function() {
 			ctx.beginPath();
 			drawSegments(ctx, this, matrix);
 			ctx.stroke();
-			drawHandles(ctx, this._segments, matrix, paper.settings.handleSize);
+			drawHandles(ctx, this._segments, matrix, paper.settings.handleSize,
+				this.isFullySelected());
 		}
 	};
 },
@@ -10237,7 +10211,7 @@ var CompoundPath = PathItem.extend({
 
 	_hitTestChildren: function _hitTestChildren(point, options, viewMatrix) {
 		return _hitTestChildren.base.call(this, point,
-				options.class === Path || options.type === 'path' ? options
+				options.class === Path || options.type === 'path' || options.hitUnfilledPaths ? options
 					: Base.set({}, options, { fill: false }),
 				viewMatrix);
 	},
@@ -10253,7 +10227,7 @@ var CompoundPath = PathItem.extend({
 			children[i].draw(ctx, param, strokeMatrix);
 
 		if (!param.clip) {
-			this._setStyles(ctx, param, viewMatrix);
+			this._setStyles(ctx, param, viewMatrix, strokeMatrix);
 			var style = this._style;
 			if (style.hasFill()) {
 				ctx.fill(style.getFillRule());
@@ -11625,6 +11599,11 @@ var PointText = TextItem.extend({
 	},
 
 	_getBounds: function(matrix, options) {
+		var rect = options.drawnTextBounds ? this._getDrawnTextSize() : this._getMeasuredTextSize();
+		return matrix ? matrix._transformBounds(rect, rect) : rect;
+	},
+
+	_getMeasuredTextSize: function() {
 		var style = this._style,
 			lines = this._lines,
 			numLines = lines.length,
@@ -11634,10 +11613,67 @@ var PointText = TextItem.extend({
 			x = 0;
 		if (justification !== 'left')
 			x -= width / (justification === 'center' ? 2: 1);
-		var rect = new Rectangle(x,
+		return new Rectangle(x,
 					numLines ? - 0.75 * leading : 0,
 					width, numLines * leading);
-		return matrix ? matrix._transformBounds(rect, rect) : rect;
+	},
+
+	_getDrawnTextSize: function() {
+		var style = this._style;
+		var lines = this._lines;
+		var numLines = lines.length;
+		var leading = style.getLeading();
+		var justification = style.getJustification();
+
+		var svg = SvgElement.create('svg', {
+					version: '1.1',
+					xmlns: SvgElement.svg
+				});
+		var node = SvgElement.create('text');
+		node.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
+		svg.appendChild(node);
+		for (var i = 0; i < numLines; i++) {
+			var tspanNode = SvgElement.create('tspan', {
+				x: '0',
+				dy: i === 0 ? '0' : leading + 'px'
+			});
+			tspanNode.textContent = this._lines[i];
+			node.appendChild(tspanNode);
+		}
+
+		var element = document.createElement('span');
+		element.style.visibility = ('hidden');
+		element.style.whiteSpace = 'pre';
+		element.style.fontSize = this.fontSize + 'px';
+		element.style.fontFamily = this.font;
+		element.style.lineHeight = this.leading / this.fontSize;
+
+		var bbox;
+		try {
+			element.appendChild(svg);
+			document.body.appendChild(element);
+			bbox = svg.getBBox();
+		} finally {
+			document.body.removeChild(element);
+		}
+
+		var halfStrokeWidth = this.strokeWidth / 2;
+		var width = bbox.width + (halfStrokeWidth * 2);
+		var height = bbox.height + (halfStrokeWidth * 2);
+		var x = bbox.x - halfStrokeWidth;
+		var y = bbox.y - halfStrokeWidth;
+
+		if (justification !== 'left') {
+			var eltWidth = this.getView().getTextWidth(style.getFontStyle(), lines);
+			x -= eltWidth / (justification === 'center' ? 2: 1);
+		}
+
+		return new Rectangle(x, y, width + 1, Math.max(height, numLines * leading));
+	},
+
+	_hitTestSelf: function(point, options) {
+		if (options.fill && (this.hasFill() || options.hitUnfilledPaths) && this._contains(point))
+			return new HitResult('fill', this);
 	}
 });
 
@@ -12109,8 +12145,9 @@ var Color = Base.extend(new function() {
 						+ components.join(',') + ')';
 		},
 
-		toCanvasStyle: function(ctx, matrix) {
-			if (this._canvasStyle)
+		toCanvasStyle: function(ctx, matrix, strokeMatrix) {
+			var strokeMayChange = this._type === 'gradient' && strokeMatrix;
+			if (this._canvasStyle && !strokeMayChange)
 				return this._canvasStyle;
 			if (this._type !== 'gradient')
 				return this._canvasStyle = this.toCSS();
@@ -12127,6 +12164,12 @@ var Color = Base.extend(new function() {
 				destination = inverse._transformPoint(destination);
 				if (highlight)
 					highlight = inverse._transformPoint(highlight);
+			}
+			if (strokeMatrix) {
+				origin = strokeMatrix._transformPoint(origin);
+				destination = strokeMatrix._transformPoint(destination);
+				if (highlight)
+					highlight = strokeMatrix._transformPoint(highlight);
 			}
 			if (gradient._radial) {
 				var radius = destination.getDistance(origin);
@@ -12149,7 +12192,8 @@ var Color = Base.extend(new function() {
 						offset == null ? i / (l - 1) : offset,
 						stop._color.toCanvasStyle());
 			}
-			return this._canvasStyle = canvasGradient;
+			if (!strokeMayChange) this._canvasStyle = canvasGradient;
+			return canvasGradient;
 		},
 
 		transform: function(matrix) {
@@ -13165,7 +13209,7 @@ var View = Base.extend(Emitter, {
 
 	setMatrix: function() {
 		var matrix = this._matrix;
-		matrix.set.apply(matrix, arguments);
+		matrix.initialize.apply(matrix, arguments);
 	},
 
 	transform: function(matrix) {
@@ -14059,7 +14103,7 @@ var Tween = Base.extend(Emitter, {
 	_class: 'Tween',
 
 	statics: {
-		easings: new Base({
+		easings: {
 			linear: function(t) {
 				return t;
 			},
@@ -14119,7 +14163,7 @@ var Tween = Base.extend(Emitter, {
 					? 16 * t * t * t * t * t
 					: 1 + 16 * (--t) * t * t * t * t;
 			}
-		})
+		}
 	},
 
 	initialize: function Tween(object, from, to, duration, easing, start) {
@@ -14165,7 +14209,7 @@ var Tween = Base.extend(Emitter, {
 
 	update: function(progress) {
 		if (this.running) {
-			if (progress >= 1) {
+			if (progress > 1) {
 				progress = 1;
 				this.running = false;
 			}
@@ -14187,14 +14231,14 @@ var Tween = Base.extend(Emitter, {
 				this._setProperty(this._parsedKeys[key], value);
 			}
 
+			if (!this.running && this._then) {
+				this._then(this.object);
+			}
 			if (this.responds('update')) {
 				this.emit('update', new Base({
 					progress: progress,
 					factor: factor
 				}));
-			}
-			if (!this.running && this._then) {
-				this._then(this.object);
 			}
 		}
 		return this;
@@ -14325,7 +14369,7 @@ var Http = {
 	}
 };
 
-var CanvasProvider = Base.exports.CanvasProvider = {
+var CanvasProvider = {
 	canvases: [],
 
 	getCanvas: function(width, height) {
@@ -14893,7 +14937,7 @@ new function() {
 		return SvgElement.create('use', attrs, formatter);
 	}
 
-	function exportGradient(color) {
+	function exportGradient(color, item) {
 		var gradientNode = getDefinition(color, 'color');
 		if (!gradientNode) {
 			var gradient = color.getGradient(),
@@ -14920,6 +14964,11 @@ new function() {
 					y2: destination.y
 				};
 			}
+			if (item instanceof paper.PointText) {
+				attrs.gradientTransform = getTransform(
+					item._matrix.clone().invert(), false, formatter).transform;
+			}
+
 			attrs.gradientUnits = 'userSpaceOnUse';
 			gradientNode = SvgElement.create((radial ? 'radial' : 'linear')
 					+ 'Gradient', attrs, formatter);
@@ -14945,9 +14994,18 @@ new function() {
 	}
 
 	function exportText(item) {
-		var node = SvgElement.create('text', getTransform(item._matrix, true),
+		var node = SvgElement.create('text', getTransform(item._matrix, false),
 				formatter);
-		node.textContent = item._content;
+		node.setAttribute('font-size', item.fontSize);
+		node.setAttribute('xml:space', 'preserve');
+		for (var i = 0; i < item._lines.length; i++) {
+			var tspanNode = SvgElement.create('tspan', {
+				x: '0',
+				dy: i === 0 ? '0' : item.getLeading() + 'px'
+			}, formatter);
+			tspanNode.textContent = item._lines[i] ? item._lines[i] : ' ';
+			node.appendChild(tspanNode);
+		}
 		return node;
 	}
 
@@ -14974,9 +15032,13 @@ new function() {
 			var get = entry.get,
 				type = entry.type,
 				value = item[get]();
+
+			if (value === undefined) return;
+
 			if (entry.exportFilter
 					? entry.exportFilter(item, value)
-					: !parent || !Base.equals(parent[get](), value)) {
+					: !parent || !Base.equals(parent[get](), value) ||
+					  item instanceof paper.PointText) {
 				if (type === 'color' && value != null) {
 					var alpha = value.getAlpha();
 					if (alpha < 1)
@@ -15086,7 +15148,7 @@ new function() {
 				rect = bounds === 'view'
 					? new Rectangle([0, 0], view.getViewSize())
 					: bounds === 'content'
-						? Item._getBounds(children, matrix, { stroke: true })
+						? Item._getBounds(children, matrix, { stroke: true, drawnTextBounds: true })
 							.rect
 						: Rectangle.read([bounds], 0, { readNull: true }),
 				attrs = {
@@ -15330,10 +15392,44 @@ new function() {
 		},
 
 		text: function(node) {
-			var text = new PointText(getPoint(node).add(
-					getPoint(node, 'dx', 'dy')));
-			text.setContent(node.textContent.trim() || '');
-			return text;
+
+			var fontSize = parseFloat(node.getAttribute("font-size"));
+			var alignmentBaseline = node.getAttribute("alignment-baseline");
+			if (node.childElementCount === 0) {
+				var text = new PointText();
+				text.setContent(node.textContent.trim() || '');
+				text.translate(0, text._style.getLeading());
+				if (!isNaN(fontSize)) text.setFontSize(fontSize);
+				return text;
+			} else {
+				var lines = [];
+				var spacing = 1.2;
+				for (var i = 0; i < node.childNodes.length; i++) {
+					var child = node.childNodes[i];
+					if (!child.getAttribute) continue;
+					lines.push(child.textContent);
+					var dyString = child.getAttribute('dy');
+					if (dyString) {
+						var dy = parseFloat(dyString);
+						if (!isNaN(dy)) {
+							if (dyString.endsWith('em')) {
+								spacing = dy;
+							} else if (dyString.endsWith('px') && !isNaN(fontSize)) {
+								spacing = dy / fontSize;
+							}
+						}
+					}
+				}
+				var text = new PointText();
+				if (!isNaN(fontSize)) text.setFontSize(fontSize);
+				text.setLeading(text.fontSize * spacing);
+				if (alignmentBaseline === 'text-before-edge') {
+					text.setContent(' ');
+					text.translate(0, text.bounds.height);
+				}
+				text.setContent(lines.join('\n'));
+				return text;
+			}
 		},
 
 		switch: importGroup
@@ -15405,8 +15501,6 @@ new function() {
 	}, {}), {
 		id: function(item, value) {
 			definitions[value] = item;
-			if (item.setName)
-				item.setName(value);
 		},
 
 		'clip-path': function(item, value) {
@@ -15479,6 +15573,10 @@ new function() {
 				if (matrix)
 					group.transform(matrix);
 			}
+		},
+
+		'fill-rule': function(item, value) {
+			if (value === 'evenodd' || value === 'nonzero') item.fillRule = value;
 		}
 	});
 
@@ -15596,7 +15694,7 @@ new function() {
 				var node = typeof svg === 'object'
 					? svg
 					: new self.DOMParser().parseFromString(
-						svg.trim(),
+						svg,
 						'image/svg+xml'
 					);
 				if (!node.nodeName) {

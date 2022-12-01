@@ -1,4 +1,10 @@
-# Paper.js - The Swiss Army Knife of Vector Graphics Scripting [![Build Status](https://travis-ci.org/paperjs/paper.js.svg?branch=develop)](https://travis-ci.org/paperjs/paper.js) [![NPM](https://img.shields.io/npm/v/paper.svg)](https://www.npmjs.com/package/paper)
+# Scratch's fork of Paper.js [![Build Status](https://circleci.com/gh/LLK/paper.js.svg?style=shield)](https://app.circleci.com/pipelines/github/LLK/paper.js?branch=develop) [![NPM](https://img.shields.io/npm/v/@scratch/paper.svg)](https://www.npmjs.com/package/@scratch/paper)
+
+This is a fork of Paper.js for use in Scratch. Please do not contact the Paper.js authors to support this fork.
+
+_Original README.md below_
+
+# Paper.js - The Swiss Army Knife of Vector Graphics Scripting
 
 If you want to work with Paper.js, simply download the latest "stable" version
 from [http://paperjs.org/download/](http://paperjs.org/download/)
@@ -64,9 +70,8 @@ different projects:
 Homebrew is recommended on macOS also if you intend to install Paper.js with
 rendering to the Canvas on Node.js, as described in the next paragraph.
 
-For Linux, see <https://nodejs.org/download/> to locate 32-bit and 64-bit
-Node.js binaries as well as sources, or use NVM, as described in the paragraph
-above.
+For Linux, see <https://nodejs.org/download/> to locate 32-bit and 64-bit Node.js
+binaries as well as sources, or use NVM, as described in the paragraph above.
 
 ### Installing Paper.js Using NPM
 
@@ -168,20 +173,21 @@ run:
 
 ### Setting Up For Building
 
-Paper.js uses [Gulp.js](https://gulpjs.com/) for building, and has a couple of
-dependencies as NPM modules. Read the chapter [Installing Node.js and
-NPM](#installing-nodejs-and-npm) if you still need to install these.
-
-Due to a conflict in Gulp 3 that could only be resolved using package
-resolution, we recently switched from NPM to `yarn` for development, which also
-needs to be installed now. See
-[Installing Yarn](https://classic.yarnpkg.com/en/docs/install/) for details.
+As of 2016, Paper.js uses [Gulp.js](https://gulpjs.com/) for building, and has a
+couple of dependencies as NPM modules. Read the chapter [Installing
+Node.js and NPM](#installing-nodejs-and-npm) if you still need to
+install these.
 
 In order to be able to build Paper.js, after checking out the repository, paper
 has dependencies that need to be installed. Install them by issuing the
 following commands from the Paper.js directory:
 
-    yarn install
+    npm install
+
+It is also recommended to install Gulp.js globally, so you can easier execute
+the build commands from anywhere in the command line:
+
+    npm install -g gulp
 
 ### Building the Library
 
@@ -189,7 +195,7 @@ The Paper.js sources are distributed across many separate files, organised in
 subfolders inside the `src` folder. To compile them all into distributable
 files, you can run the `build` task:
 
-    yarn build
+    gulp build
 
 You will then find the built library files inside the `dist` folder, named
 `paper-full.js` and `paper-core.js`, along with their minified versions. Read
@@ -207,11 +213,11 @@ library.
 This means you can switch between loading from sources and loading a built
 library simply by running.
 
-    yarn load
+    gulp load
 
 And to go back to a built library
 
-    yarn build
+    gulp build
 
 Note that your PaperScripts examples do not need to change, they can keep
 loading `dist/paper-full.js`, which will always do the right thing. Note also
@@ -221,7 +227,11 @@ that `src/load.js` handles both browsers and Node.js, as supported by Prepro.js.
 
 Create a final zipped distribution file inside the `dist` folder:
 
-    yarn dist
+    gulp dist
+
+And since `dist` is the default task, this is the same:
+
+    gulp
 
 ### Branch structure
 
@@ -232,7 +242,7 @@ only merged into [`master`](https://github.com/paperjs/paper.js/tree/master)
 when a new release occurs.
 
 As of version `0.9.26`, the `dist` folder is excluded on all branches, and the
-building is now part of the `yarn publish` process by way of the `prepublish`
+building is now part of the `npm publish` process by way of the `prepublish`
 script.
 
 We also offer prebuilt versions of the latest state of the `develop` branch on
@@ -244,7 +254,7 @@ and [`prebuilt/dist`](https://github.com/paperjs/paper.js/tree/prebuilt/dist).
 Similarly to building the library, you can run the `docs` task to build the
 documentation:
 
-    yarn docs
+    gulp docs
 
 Your docs will then be located at `dist/docs`.
 
@@ -262,20 +272,20 @@ CORS restrictions. In order to run the browser based tests on Chrome, you need
 to run a local web-server through Gulp.js. The following command will handle it
 for you, and will also open the browser at the right address straight away:
 
-    yarn test:browser
+    gulp test:browser
 
 You can also run the unit tests through PhantomJS in Gulp directly on the
 command line:
 
-    yarn test:phantom
+    gulp test:phantom
 
 To test the Node.js version of Paper.js, use this command:
 
-    yarn test:node
+    gulp test:node
 
 And to test both the PhantomJS and Node.js environments together, simply run:
 
-    yarn test
+    gulp test
 
 ### Contributing [![Open Source Helpers](https://www.codetriage.com/paperjs/paper.js/badges/users.svg)](https://www.codetriage.com/paperjs/paper.js)
 
