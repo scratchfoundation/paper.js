@@ -389,7 +389,7 @@ item.hitTestAll(point);
 item.hitTestAll(point, {});
 item.matches({});
 item.matches(callback);
-item.matches(name, {});
+item.matches(item.name, {});
 item.getItems({});
 item.getItems(callback);
 item.getItem({});
