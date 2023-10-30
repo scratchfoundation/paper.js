@@ -28,7 +28,7 @@ commands:
 jobs:
   default:
     docker:
-      - image: circleci/node:10-browsers # TODO: switch to cimg/node:* after upgrading gulp
+      - image: cimg/node:10.24.1-browsers
     steps:
       - checkout
       - run: git submodule update --init --recursive
