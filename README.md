@@ -1,38 +1,45 @@
-# Paper.js - The Swiss Army Knife of Vector Graphics Scripting [![Build Status](https://travis-ci.org/paperjs/paper.js.svg?branch=develop)](https://travis-ci.org/paperjs/paper.js) [![NPM](https://img.shields.io/npm/v/paper.svg)](https://www.npmjs.com/package/paper) ![Bower](https://img.shields.io/bower/v/paper.svg)
+# Scratch's fork of Paper.js [![Build Status](https://circleci.com/gh/LLK/paper.js.svg?style=shield)](https://app.circleci.com/pipelines/github/LLK/paper.js?branch=develop) [![NPM](https://img.shields.io/npm/v/@scratch/paper.svg)](https://www.npmjs.com/package/@scratch/paper)
+
+This is a fork of Paper.js for use in Scratch. Please do not contact the Paper.js authors to support this fork.
+
+_Original README.md below_
+
+# Paper.js - The Swiss Army Knife of Vector Graphics Scripting
 
 If you want to work with Paper.js, simply download the latest "stable" version
 from [http://paperjs.org/download/](http://paperjs.org/download/)
 
 - Website: <http://paperjs.org/>
-- Discussion forum: <http://groups.google.com/group/paperjs>
+- Questions: <https://stackoverflow.com/questions/tagged/paperjs>
+- Discussion forum: <https://groups.google.com/group/paperjs>
 - Mainline source code: <https://github.com/paperjs/paper.js>
-- Twitter: [@paperjs](http://twitter.com/paperjs)
+- Twitter: [@paperjs](https://twitter.com/paperjs)
 - Latest releases: <http://paperjs.org/download/>
-- Pre-built development versions: [`prebuilt/module`](https://github.com/paperjs/paper.js/tree/prebuilt/module)
-and [`prebuilt/dist`](https://github.com/paperjs/paper.js/tree/prebuilt/dist) branches.
+- Pre-built development versions:
+  [`prebuilt/module`](https://github.com/paperjs/paper.js/tree/prebuilt/module)
+  and [`prebuilt/dist`](https://github.com/paperjs/paper.js/tree/prebuilt/dist)
+  branches.
 
 ## Installing Paper.js
 
 The recommended way to install and maintain Paper.js as a dependency in your
 project is through the [Node.js Package Manager (NPM)](https://www.npmjs.com/)
-for browsers, Node.js or Electron, as well as through Bower for browsers.
+for browsers, Node.js or Electron.
 
-If NPM or Bower is already installed, simply type one of these
-commands in your project folder:
+If NPM is already installed, simply type one of these commands in your project
+folder:
 
 ```sh
 npm install paper
-# Or:
-bower install paper
 ```
 
 Upon execution, you will find a `paper` folder inside the project's
-`node_modules` / `bower_components` folder.
+`node_modules` folder.
 
 For more information on how to install Node.js and NPM, read the chapter
 [Installing Node.js and NPM](#installing-nodejs-and-npm).
 
-### Which Version to Use?
+### Which Version to Use
 
 The various distributions come with two different pre-build versions of
 Paper.js, in minified and normal variants:
@@ -51,9 +58,9 @@ generally not recommended to install Node.js through OS-supplied package
 managers, as the its development cycles move fast and these versions are often
 out-of-date.
 
-On macOS, [Homebrew](http://brew.sh/) is a good option if one version of
+On macOS, [Homebrew](https://brew.sh/) is a good option if one version of
 Node.js that is kept up to date with `brew upgrade` is enough:  
-<http://treehouse.github.io/installation-guides/mac/node-mac.html>
+<https://treehouse.github.io/installation-guides/mac/node-mac.html>
 
 [NVM](https://github.com/creationix/nvm) can be used instead to install and
 maintain multiple versions of Node.js on the same platform, as often required by
@@ -63,10 +70,10 @@ different projects:
 Homebrew is recommended on macOS also if you intend to install Paper.js with
 rendering to the Canvas on Node.js, as described in the next paragraph.
 
-For Linux, see <http://nodejs.org/download/> to locate 32-bit and 64-bit Node.js
+For Linux, see <https://nodejs.org/download/> to locate 32-bit and 64-bit Node.js
 binaries as well as sources, or use NVM, as described in the paragraph above.
 
-### Installing Paper.js for Node.js
+### Installing Paper.js Using NPM
 
 Paper.js comes in three different versions on NPM: `paper`, `paper-jsdom` and
 `paper-jsdom-canvas`. Depending on your use case, you need to required a
@@ -81,12 +88,19 @@ different one:
   SVG importing and exporting through [jsdom](https://github.com/tmpvar/jsdom).
 
 In order to install `paper-jsdom-canvas`, you need the [Cairo Graphics
-library](http://cairographics.org/) installed in your system:
+library](https://cairographics.org/) installed in your system:
 
-##### Installing Cairo and Pango on macOS:
+### Installing Native Dependencies
 
-The easiest way to install Cairo is through [Homebrew](http://brew.sh/), by
-issuing the command:
+Paper.js relies on [Node-Canvas](https://github.com/Automattic/node-canvas) for
+rendering, which in turn relies on the native libraries
+[Cairo](https://cairographics.org/) and [Pango](https://www.pango.org/).
+
+#### Installing Native Dependencies on macOS
+
+Paper.js relies on Node-Canvas for rendering, which in turn relies on Cairo and
+Pango. The easiest way to install Cairo is through
+[Homebrew](https://brew.sh/), by issuing the command:
 
     brew install cairo pango
 
@@ -110,7 +124,7 @@ After adding this line, your commands should work in the expected way:
     npm install paper
     npm update
 
-##### Installing Cairo, Pango and all other dependencies on Debian/Ubuntu Linux:
+#### Installing Native Dependencies on Debian/Ubuntu Linux
 
     sudo apt-get install pkg-config libcairo2-dev libpango1.0-dev libssl-dev libjpeg62-dev libgif-dev
 
@@ -119,24 +133,23 @@ build from c++ sources:
 
     sudo apt-get install build-essential
 
-##### After Cairo has been installed:
+#### Installing Native Dependencies for Electron
+
+In order to build Node-Canvas for use of `paper-jsdom-canvas` in Electron, which
+is likely to use a different version of V8 than the Node binary installed in
+your system, you need to manually specify the location of Electron’s headers.
+Follow these steps to do so:
+
+[Electron — Using Native Node
+Modules](https://electron.atom.io/docs/tutorial/using-native-node-modules/)
+
+#### After Native Dependencies have been installed
 
 You should now be able to install the Paper.js module with jsdom and Canvas
 rendering from NPM:
 
     npm install paper-jsdom-canvas
 
-### Installing Paper.js with Node-Canvas for Electron
-
-[Node-Canvas](https://github.com/Automattic/node-canvas) is a native dependency.
-In order to build it for use of `paper-jsdom-canvas` in Electron, which is
-likely to use a different version of V8 than the Node binary installed in your
-system, you need to manually specify the location of Electron’s headers. Follow
-these steps to do so:
-
-[Electron — Using Native Node
-Modules](https://electron.atom.io/docs/tutorial/using-native-node-modules/)
- 
 ## Development
 
 The main Paper.js source tree is hosted on
@@ -160,9 +173,9 @@ run:
 
 ### Setting Up For Building
 
-As of 2016, Paper.js uses [Gulp.js](http://gulpjs.com/) for building, and has a
-couple of dependencies as Bower and NPM modules. Read the chapter [Installing
-Node.js, NPM and Bower](#installing-nodejs-npm-and-bower) if you still need to
+As of 2016, Paper.js uses [Gulp.js](https://gulpjs.com/) for building, and has a
+couple of dependencies as NPM modules. Read the chapter [Installing
+Node.js and NPM](#installing-nodejs-and-npm) if you still need to
 install these.
 
 In order to be able to build Paper.js, after checking out the repository, paper
@@ -248,7 +261,7 @@ Your docs will then be located at `dist/docs`.
 ### Testing
 
 Paper.js was developed and tested from day 1 using proper unit testing through
-jQuery's [Qunit](http://docs.jquery.com/Qunit). To run the tests after any
+jQuery's [Qunit](https://qunitjs.com/). To run the tests after any
 change to the library's source, simply open `index.html` inside the `test`
 folder in your web browser. There should be a green bar at the top, meaning all
 tests have passed. If the bar is red, some tests have not passed. These will be
@@ -274,24 +287,30 @@ And to test both the PhantomJS and Node.js environments together, simply run:
 
     gulp test
 
-### Contributing
+### Contributing [![Open Source Helpers](https://www.codetriage.com/paperjs/paper.js/badges/users.svg)](https://www.codetriage.com/paperjs/paper.js)
 
 The main Paper.js source tree is hosted on GitHub, thus you should create a fork
 of the repository in which you perform development. See
-<http://help.github.com/forking/>.
+<https://help.github.com/articles/fork-a-repo/>.
 
-We prefer that you send a [pull request on GitHub]
-(http://help.github.com/pull-requests/) which will then be merged into the
-official main line repository. You need to sign the Paper.js CLA to be able to
-contribute (see below).
+We prefer that you send a
+[pull request on GitHub](https://help.github.com/articles/about-pull-requests/) 
+which will then be merged into the official main line repository.
+You need to sign the Paper.js CLA to be able to contribute (see below).
 
 Also, in your first contribution, add yourself to the end of `AUTHORS.md` (which
 of course is optional).
 
+In addition to contributing code you can also triage issues which may include
+reproducing bug reports or asking for vital information, such as version numbers
+or reproduction instructions. If you would like to start triaging issues, one
+easy way to get started is to
+[subscribe to paper.js on CodeTriage](https://www.codetriage.com/paperjs/paper.js).
+
 **Get the source (for contributing):**
 
 If you want to contribute to the project you will have to [make a
-fork](http://help.github.com/forking/). Then do this:
+fork](https://help.github.com/articles/fork-a-repo/). Then do this:
 
     git clone --recursive git@github.com:yourusername/paper.js.git
     cd paper.js
@@ -304,11 +323,11 @@ To then fetch changes from upstream, run
 #### Creating and Submitting a Patch
 
 As mentioned above, we prefer that you send a
-[pull request](http://help.github.com/pull-requests/) on GitHub:
+[pull request](https://help.github.com/articles/about-pull-requests/) on GitHub:
 
 1. Create a fork of the upstream repository by visiting
    <https://github.com/paperjs/paper.js/fork>. If you feel insecure, here's a
-   great guide: <http://help.github.com/forking/>
+   great guide: <https://help.github.com/articles/fork-a-repo/>
 
 2. Clone of your repository: `git clone
    https://yourusername@github.com/yourusername/paper.js.git`
@@ -326,7 +345,7 @@ As mentioned above, we prefer that you send a
    repository's site at GitHub (i.e. https://github.com/yourusername/paper.js)
    and press the "Pull Request" button. Make sure you are creating the pull
    request to the `develop` branch, not the `master` branch. Here's a good guide
-   on pull requests: <http://help.github.com/pull-requests/>
+   on pull requests: <https://help.github.com/articles/about-pull-requests/>
 
 ##### Use one topic branch per feature:
 
@@ -335,7 +354,7 @@ together into your `develop` branch (or develop everything in your `develop`
 branch and then cherry-pick-and-merge into the different topic branches). Git
 provides for an extremely flexible workflow, which in many ways causes more
 confusion than it helps you when new to collaborative software development. The
-guides provided by GitHub at <http://help.github.com/> are a really good
+guides provided by GitHub at <https://help.github.com/> are a really good
 starting point and reference. If you are fixing an issue, a convenient way to
 name the branch is to use the issue number as a prefix, like this: `git checkout
 -tb issue-937-feature-add-text-styling`.
@@ -343,7 +362,7 @@ name the branch is to use the issue number as a prefix, like this: `git checkout
 #### Contributor License Agreement
 
 Before we can accept any contributions to Paper.js, you need to sign this
-[CLA](http://en.wikipedia.org/wiki/Contributor_License_Agreement):
+[CLA](https://en.wikipedia.org/wiki/Contributor_License_Agreement):
 
 [Contributor License Agreement](https://spreadsheets.google.com/a/paperjs.org/spreadsheet/embeddedform?formkey=dENxd0JBVDY2REo3THVuRmh4YjdWRlE6MQ)
 
@@ -352,10 +371,11 @@ Before we can accept any contributions to Paper.js, you need to sign this
 > defend the project should there be a legal dispute regarding the software at
 > some future time.
 
-For a list of authors and contributors, please see [AUTHORS]
-(https://github.com/paperjs/paper.js/blob/master/AUTHORS.md).
+For a list of authors and contributors, please see 
+[AUTHORS](https://github.com/paperjs/paper.js/blob/master/AUTHORS.md).
 
 ## License
 
-Distributed under the MIT license. See [LICENSE]
-(https://github.com/paperjs/paper.js/blob/master/LICENSE.txt) for details.
+Distributed under the MIT license. See 
+[LICENSE](https://github.com/paperjs/paper.js/blob/master/LICENSE.txt)
+fo details.

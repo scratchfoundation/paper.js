@@ -150,7 +150,7 @@
 	
 	<li>
 <tt>values:</tt> 
-Array of <tt>Number</tt>s
+Array of <tt>Numbers</tt>
 &mdash;&nbsp;the matrix values to initialize this matrix with
 
 </li>
@@ -400,7 +400,7 @@ Array of <tt>Number</tt>s
 	<ul class="member-list">
 		<h4>Type:</h4>
 		<li>
-			Array of <tt>Number</tt>s
+			Array of <tt>Numbers</tt>
 		</li>
 	</ul>
     
@@ -520,16 +520,38 @@ Array of <tt>Number</tt>s
 		<h2>Methods</h2>
 		
 	
-<div id="set" class="member">
+<div id="set-values" class="member">
 <div class="member-link">
-<a name="set" href="#set"><tt><b>set</b>()</tt></a>
+<a name="set-values" href="#set-values"><tt><b>set</b>(...values)</tt></a>
 </div>
 <div class="member-description hidden">
 <div class="member-text">
 	<p>Sets the matrix to the passed values. Note that any sequence of parameters that is supported by the various <a href="../classes/Matrix.html"><tt>Matrix</tt></a>() constructors also work for calls of <code>set()</code>.</p>
     
 	
+<ul class="member-list">
+	<h4>Parameters:</h4>
 	
+	<li>
+<tt>values:</tt> 
+<tt>any value</tt>
+
+
+</li>
+	
+</ul>
+
+	
+	<ul class="member-list">
+		<h4>Returns:</h4>
+		
+			<li>
+<tt><a href="../classes/Point.html"><tt>Point</tt></a></tt>
+</li>
+
+		
+	</ul>
+
 
 
 	
@@ -657,9 +679,9 @@ Array of <tt>Number</tt>s
 </div>
 
 	
-<div id="apply-recursively" class="member">
+<div id="apply" class="member">
 <div class="member-link">
-<a name="apply-recursively" href="#apply-recursively"><tt><b>apply</b>(recursively)</tt></a>
+<a name="apply" href="#apply"><tt><b>apply</b>([recursively])</tt></a>
 </div>
 <div class="member-description hidden">
 <div class="member-text">
@@ -672,8 +694,8 @@ Array of <tt>Number</tt>s
 	<li>
 <tt>recursively:</tt> 
 <tt>Boolean</tt>
-&mdash;&nbsp;controls whether to apply transformations recursively on children
-
+&mdash;&nbsp;controls whether to apply  transformations recursively on children
+&mdash;&nbsp;optional, default: <tt>true</tt>
 </li>
 	
 </ul>
@@ -1328,7 +1350,7 @@ Array of <tt>Number</tt>s
 </div>
 <div class="member-description hidden">
 <div class="member-text">
-	<p>Returns a new matrix as the result of prepending the specified matrix to this matrix. This is the equivalent of multiplying <code>(specified matrix) s* (this matrix)</code>.</p>
+	<p>Returns a new matrix as the result of prepending the specified matrix to this matrix. This is the equivalent of multiplying <code>(specified matrix) * (this matrix)</code>.</p>
     
 	
 <ul class="member-list">
@@ -1563,14 +1585,14 @@ Array of <tt>Number</tt>s
 	
 	<li>
 <tt>src:</tt> 
-Array of <tt>Number</tt>s
+Array of <tt>Numbers</tt>
 &mdash;&nbsp;the array containing the source points as x, y value pairs
 
 </li>
 	
 	<li>
 <tt>dst:</tt> 
-Array of <tt>Number</tt>s
+Array of <tt>Numbers</tt>
 &mdash;&nbsp;the array into which to store the transformed point pairs
 
 </li>
@@ -1589,7 +1611,7 @@ Array of <tt>Number</tt>s
 		<h4>Returns:</h4>
 		
 			<li>
-<tt>Array of <tt>Number</tt>s</tt>&nbsp;&mdash;&nbsp;the dst array, containing the transformed coordinates
+<tt>Array of <tt>Numbers</tt></tt>&nbsp;&mdash;&nbsp;the dst array, containing the transformed coordinates
 </li>
 
 		
@@ -1626,6 +1648,16 @@ Array of <tt>Number</tt>s
 </ul>
 
 	
+	<ul class="member-list">
+		<h4>Returns:</h4>
+		
+			<li>
+<tt><a href="../classes/Point.html"><tt>Point</tt></a></tt>
+</li>
+
+		
+	</ul>
+
 
 
 	
@@ -1641,7 +1673,7 @@ Array of <tt>Number</tt>s
 </div>
 <div class="member-description hidden">
 <div class="member-text">
-	<p>Attempts to decompose the affine transformation described by this matrix into <code>scaling</code>, <code>rotation</code> and <code>skewing</code>, and returns an object with these properties if it succeeded, <code>null</code> otherwise.</p>
+	<p>Decomposes the affine transformation described by this matrix into <code>scaling</code>, <code>rotation</code> and <code>skewing</code>, and returns an object with these properties.</p>
     
 	
 	
@@ -1649,7 +1681,7 @@ Array of <tt>Number</tt>s
 		<h4>Returns:</h4>
 		
 			<li>
-<tt><tt>Object</tt></tt>&nbsp;&mdash;&nbsp;the decomposed matrix, or <code>null</code> if decomposition is not  possible
+<tt><tt>Object</tt></tt>&nbsp;&mdash;&nbsp;the decomposed matrix
 </li>
 
 		
@@ -1703,8 +1735,8 @@ Array of <tt>Number</tt>s
 
 <!-- =========================== copyright notice ========================== -->
 <p class="footer">
-Paper.js v0.11.5 (develop)<br>
-Copyright &#169; 2011—2017 <a href="http://www.lehni.org" target="_blank">J&uuml;rg Lehni</a> &amp; <a href="http://www.jonathanpuckey.com" target="_blank">Jonathan Puckey</a>. All Rights Reserved.</p>
+Paper.js v0.12.7<br>
+Copyright &#169; 2011—2023 <a href="http://www.lehni.org" target="_blank">J&uuml;rg Lehni</a> &amp; <a href="http://www.jonathanpuckey.com" target="_blank">Jonathan Puckey</a>. All Rights Reserved.</p>
 <div class="content-end"></div>
 
 
