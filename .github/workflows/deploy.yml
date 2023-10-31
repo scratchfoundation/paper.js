@@ -50,6 +50,7 @@ jobs:
         - run: gulp test
         - run: gulp zip
         - name: Tag build
+          if: (github.ref == 'refs/heads/master') || (github.ref == 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/hotfix') || startsWith(github.ref, 'refs/heads/release')
           run: |
             TRAVIS_TAG="${{github.ref_name}}" TRAVIS_COMMIT="${{github.sha}}" travis/deploy-prebuilt.sh
         
