@@ -26,7 +26,7 @@ echo "https://${GH_TOKEN}:@github.com" > .git/credentials
 #     fetch = +refs/heads/*:refs/remotes/origin/*
 # We can change the fetch setting by removing and adding the origin again:
 git remote remove origin
-git remote add origin https://github.com/paperjs/paper.js.git
+git remote add origin https://github.com/scratchfoundation/paper.js.git
 
 # Avoid detached head...
 git checkout $TRAVIS_BRANCH

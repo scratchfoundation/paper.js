@@ -1,0 +1,56 @@
+on:
+  push: # Runs whenever a commit is pushed to the repository...
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+permissions: 
+  contents: write
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    env:
+        JVM_OPTS: -Xmx3200m
+        JDK_JAVA_OPTIONS: --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.time=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
+    steps: 
+        - uses: actions/checkout@v4
+        - uses: wagoid/commitlint-github-action@v5
+        - name: Setup Java
+          uses: actions/setup-java@v2
+          with:
+            distribution: 'temurin'
+            java-version: 17
+        - name: Setup submodule
+          run: git submodule update --init --recursive
+        - uses: actions/setup-node@v2
+          with:
+            cache: "npm"
+            node-version-file: ".nvmrc"
+        - name: Info
+          run: |
+            cat <<EOF
+            Node version: $(node --version)
+            NPM version: $(npm --version)
+            GitHub ref: ${{ github.ref }}
+            GitHub head ref: ${{ github.head_ref }}
+            EOF
+        - name: Setup
+          run: |
+            # sudo apt update
+            # sudo apt install libgif-dev
+            TRAVIS_BRANCH="${{github.ref_name}}" travis/setup-git.sh # Configure git user info
+            travis/install-assets.sh
+            npm set progress=false
+            which gulp || npm install -g gulp-cli    
+        - name: Install NPM Dependencies
+          run: |
+            npm ci --legacy-peer-deps
+        - run: gulp jshint
+        - run: gulp minify
+        - run: gulp test
+        - run: gulp zip
+        - name: Tag build
+          if: (github.ref == 'refs/heads/master') || (github.ref == 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/hotfix') || startsWith(github.ref, 'refs/heads/release')
+          run: |
+            TRAVIS_TAG="${{github.ref_name}}" TRAVIS_COMMIT="${{github.sha}}" travis/deploy-prebuilt.sh
+        

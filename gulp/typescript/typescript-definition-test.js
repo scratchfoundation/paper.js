@@ -1,5 +1,6 @@
+"use strict";
 /// <reference path="../../dist/paper.d.ts" />
-
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * This file is used as a way to test auto-generated typescript definition
  * validity. For now, this only check that calling methods as they are defined
@@ -9,60 +10,52 @@
  * - typescript compiler check: `let result:type = methodCall()`
  * - dedicated testing library like: https://github.com/Microsoft/dtslint
  */
-
-import * as paper from 'paper';
-
-
+var paper = require("paper");
 //
 // Utility variables
 //
-
-let point            = {} as paper.Point;
-let size             = {} as paper.Size;
-let rectangle        = {} as paper.Rectangle;
-let matrix           = {} as paper.Matrix;
-let project          = {} as paper.Project;
-let item             = {} as paper.Item;
-let layer            = {} as paper.Layer;
-let group            = {} as paper.Group;
-let shape            = {} as paper.Shape;
-let raster           = {} as paper.Raster;
-let pathItem         = {} as paper.PathItem;
-let path             = {} as paper.Path;
-let compoundPath     = {} as paper.CompoundPath;
-let segment          = {} as paper.Segment;
-let curve            = {} as paper.Curve;
-let curveLocation    = {} as paper.CurveLocation;
-let symbolDefinition = {} as paper.SymbolDefinition;
-let symbolItem       = {} as paper.SymbolItem;
-let style            = {} as paper.Style;
-let color            = {} as paper.Color;
-let gradient         = {} as paper.Gradient;
-let gradientStop     = {} as paper.GradientStop;
-let textItem         = {} as paper.TextItem;
-let pointText        = {} as paper.PointText;
-let view             = {} as paper.View;
-let event            = {} as paper.Event;
-let mouseEvent       = {} as paper.MouseEvent;
-let tool             = {} as paper.Tool;
-let toolEvent        = {} as paper.ToolEvent;
-let keyEvent         = {} as paper.KeyEvent;
-let paperScope       = {} as paper.PaperScope;
-let callback         = {} as () => {};
-let hitResult        = {} as paper.HitResult;
-let object           = {} as object;
-
-
+var point = {};
+var size = {};
+var rectangle = {};
+var matrix = {};
+var project = {};
+var item = {};
+var layer = {};
+var group = {};
+var shape = {};
+var raster = {};
+var pathItem = {};
+var path = {};
+var compoundPath = {};
+var segment = {};
+var curve = {};
+var curveLocation = {};
+var symbolDefinition = {};
+var symbolItem = {};
+var style = {};
+var color = {};
+var gradient = {};
+var gradientStop = {};
+var textItem = {};
+var pointText = {};
+var view = {};
+var event = {};
+var mouseEvent = {};
+var tool = {};
+var toolEvent = {};
+var keyEvent = {};
+var paperScope = {};
+var callback = {};
+var hitResult = {};
+var object = {};
 //
 // Classes
 //
-
 //
 // Point
 //
-
 new paper.Point(0, 0);
-new paper.Point([ 0, 0 ]);
+new paper.Point([0, 0]);
 new paper.Point({ x: 0, y: 0 });
 new paper.Point(size);
 new paper.Point(point);
@@ -74,7 +67,7 @@ point.angleInRadians;
 point.quadrant;
 point.selected;
 point.set(0, 0);
-point.set([ 0, 0 ]);
+point.set([0, 0]);
 point.set({ x: 0, y: 0 });
 point.set(size);
 point.set(point);
@@ -116,22 +109,18 @@ point.modulo(point);
 paper.Point.min(point, point);
 paper.Point.max(point, point);
 paper.Point.random();
-
-
 //
 // Size
 //
-
-
 new paper.Size(0, 0);
-new paper.Size([ 0, 0 ]);
+new paper.Size([0, 0]);
 new paper.Size({ width: 0, height: 0 });
 new paper.Size(size);
 new paper.Size(point);
 size.width;
 size.height;
 size.set(0, 0);
-size.set([ 0, 0 ]);
+size.set([0, 0]);
 size.set({ x: 0, y: 0 });
 size.set(size);
 size.set(point);
@@ -157,13 +146,9 @@ size.modulo(size);
 paper.Size.min(size, size);
 paper.Size.max(size, size);
 paper.Size.random();
-
-
 //
 // Rectangle
 //
-
-
 new paper.Rectangle(point, size);
 new paper.Rectangle({ point: point, size: size });
 new paper.Rectangle(0, 0, 0, 0);
@@ -210,15 +195,12 @@ rectangle.expand(0);
 rectangle.expand(0, 0);
 rectangle.scale(0);
 rectangle.scale(0, 0);
-
-
 //
 // Matrix
 //
-
 new paper.Matrix();
 new paper.Matrix(0, 0, 0, 0, 0, 0);
-new paper.Matrix([ 0, 0, 0, 0, 0, 0 ]);
+new paper.Matrix([0, 0, 0, 0, 0, 0]);
 new paper.Matrix(matrix);
 matrix.a;
 matrix.b;
@@ -231,7 +213,7 @@ matrix.translation;
 matrix.scaling;
 matrix.rotation;
 matrix.set(0, 0, 0, 0, 0, 0);
-matrix.set([ 0, 0, 0, 0, 0, 0 ]);
+matrix.set([0, 0, 0, 0, 0, 0]);
 matrix.set(matrix);
 matrix.clone();
 matrix.equals(matrix);
@@ -265,17 +247,14 @@ matrix.isIdentity();
 matrix.isInvertible();
 matrix.isSingular();
 matrix.transform(point);
-matrix.transform([ 0, 0 ], [ 0, 0 ], 0);
+matrix.transform([0, 0], [0, 0], 0);
 matrix.inverseTransform(point);
 matrix.decompose();
-matrix.applyToContext({} as CanvasRenderingContext2D);
-
-
+matrix.applyToContext({});
 //
 // Project
 //
-
-new paper.Project({} as HTMLCanvasElement);
+new paper.Project({});
 new paper.Project('');
 new paper.Project(size);
 project.view;
@@ -307,15 +286,12 @@ project.importJSON('');
 project.exportSVG();
 project.exportSVG({});
 project.importSVG('');
-project.importSVG({} as SVGElement);
+project.importSVG({});
 project.importSVG('', {});
 project.importSVG('', callback);
-
-
 //
 // Item
 //
-
 item.id;
 item.className;
 item.name;
@@ -389,7 +365,7 @@ item.hitTestAll(point);
 item.hitTestAll(point, {});
 item.matches({});
 item.matches(callback);
-item.matches(item.name, {});
+item.matches(name, {});
 item.getItems({});
 item.getItems(callback);
 item.getItem({});
@@ -400,13 +376,13 @@ item.importJSON('');
 item.exportSVG();
 item.exportSVG({});
 item.importSVG('');
-item.importSVG({} as SVGElement);
+item.importSVG({});
 item.importSVG('', {});
 item.importSVG('', callback);
 item.addChild(item);
 item.insertChild(0, item);
-item.addChildren([ item ]);
-item.insertChildren(0, [ item ]);
+item.addChildren([item]);
+item.insertChildren(0, [item]);
 item.insertAbove(item);
 item.insertBelow(item);
 item.sendToBack();
@@ -467,30 +443,21 @@ item.removeOnMove();
 item.removeOnDown();
 item.removeOnDrag();
 item.removeOnUp();
-
-
 //
 // Layer
 //
-
-new paper.Layer([ item ]);
+new paper.Layer([item]);
 new paper.Layer({});
 layer.activate();
-
-
 //
 // Group
 //
-
-new paper.Group([ item ]);
+new paper.Group([item]);
 new paper.Group({});
 group.clipped;
-
-
 //
 // Shape
 //
-
 new paper.Shape.Circle(point, 0);
 new paper.Shape.Circle({});
 new paper.Shape.Rectangle(rectangle);
@@ -505,15 +472,12 @@ shape.size;
 shape.radius;
 shape.toPath();
 shape.toPath(true);
-
-
 //
 // Raster
 //
-
 new paper.Raster();
-new paper.Raster({} as HTMLImageElement);
-new paper.Raster({} as HTMLCanvasElement);
+new paper.Raster({});
+new paper.Raster({});
 new paper.Raster('');
 new paper.Raster('', point);
 raster.size;
@@ -528,13 +492,13 @@ raster.source;
 raster.crossOrigin;
 raster.smoothing;
 raster.onLoad;
-raster.onLoad = () => {};
+raster.onLoad = function () { };
 raster.onLoad = null;
 raster.onError;
 raster.getSubCanvas(rectangle);
 raster.getSubRaster(rectangle);
 raster.toDataURL();
-raster.drawImage({} as HTMLImageElement, point);
+raster.drawImage({}, point);
 raster.getAverageColor(path);
 raster.getAverageColor(rectangle);
 raster.getAverageColor(point);
@@ -544,13 +508,10 @@ raster.setPixel(0, 0, color);
 raster.setPixel(point, color);
 raster.createImageData(size);
 raster.getImageData(rectangle);
-raster.setImageData({} as ImageData, point);
-
-
+raster.setImageData({}, point);
 //
 // HitResult
 //
-
 hitResult.type;
 hitResult.name;
 hitResult.item;
@@ -558,12 +519,9 @@ hitResult.location;
 hitResult.color;
 hitResult.segment;
 hitResult.point;
-
-
 //
 // PathItem
 //
-
 pathItem.interiorPoint;
 pathItem.clockwise;
 pathItem.pathData;
@@ -614,16 +572,13 @@ pathItem.curveBy(point, point, 0);
 pathItem.cubicCurveBy(point, point, point);
 pathItem.quadraticCurveBy(point, point);
 paper.PathItem.create('');
-paper.PathItem.create([ [ 0 ] ]);
+paper.PathItem.create([[0]]);
 paper.PathItem.create({});
-
-
 //
 // Path
 //
-
 new paper.Path();
-new paper.Path([ segment ]);
+new paper.Path([segment]);
 new paper.Path(object);
 new paper.Path('');
 new paper.Path.Line(point, point);
@@ -655,11 +610,11 @@ path.area;
 path.fullySelected;
 path.add(segment);
 path.add(point);
-path.add([0,0]);
-path.add(segment, point, [0,0]);
+path.add([0, 0]);
+path.add(segment, point, [0, 0]);
 path.insert(0, segment);
-path.addSegments([ segment ]);
-path.insertSegments(0, [ segment ]);
+path.addSegments([segment]);
+path.insertSegments(0, [segment]);
 path.removeSegment(0);
 path.removeSegments();
 path.removeSegments(0);
@@ -683,12 +638,9 @@ path.getWeightedTangentAt(0);
 path.getWeightedNormalAt(0);
 path.getCurvatureAt(0);
 path.getOffsetsWithTangent(point);
-
-
 //
 // CompoundPath
 //
-
 new paper.CompoundPath(object);
 new paper.CompoundPath('');
 compoundPath.closed;
@@ -699,12 +651,9 @@ compoundPath.firstCurve;
 compoundPath.lastCurve;
 compoundPath.area;
 compoundPath.length;
-
-
 //
 // Segment
 //
-
 new paper.Segment();
 new paper.Segment(point);
 new paper.Segment(point, point);
@@ -733,12 +682,9 @@ segment.remove();
 segment.toString();
 segment.transform(matrix);
 segment.interpolate(segment, segment, 0);
-
-
 //
 // Curve
 //
-
 new paper.Curve(segment, segment);
 new paper.Curve(point, point, point, point);
 curve.point1;
@@ -804,12 +750,9 @@ curve.getWeightedTangentAtTime(0);
 curve.getWeightedNormalAtTime(0);
 curve.getCurvatureAtTime(0);
 curve.getIntersections(curve);
-
-
 //
 // CurveLocation
 //
-
 new paper.CurveLocation(curve, 0);
 new paper.CurveLocation(curve, 0, point);
 curveLocation.segment;
@@ -830,12 +773,9 @@ curveLocation.toString();
 curveLocation.isTouching();
 curveLocation.isCrossing();
 curveLocation.hasOverlap();
-
-
 //
 // SymbolDefinition
 //
-
 new paper.SymbolDefinition(item);
 new paper.SymbolDefinition(item, true);
 symbolDefinition.project;
@@ -844,22 +784,16 @@ symbolDefinition.place();
 symbolDefinition.place(point);
 symbolDefinition.clone();
 symbolDefinition.equals(symbolDefinition);
-
-
 //
 // SymbolItem
 //
-
 new paper.SymbolItem(symbolDefinition);
 new paper.SymbolItem(item);
 new paper.SymbolItem(symbolDefinition, point);
 symbolItem.definition;
-
-
 //
 // Style
 //
-
 new paper.Style(object);
 style.view;
 style.strokeColor;
@@ -881,12 +815,9 @@ style.fontWeight;
 style.fontSize;
 style.leading;
 style.justification;
-
-
 //
 // Color
 //
-
 new paper.Color(0, 0, 0);
 new paper.Color(0, 0, 0, 0);
 new paper.Color(0);
@@ -932,55 +863,40 @@ color.multiply(color);
 color.divide(0);
 color.divide(color);
 paper.Color.random();
-
-
 //
 // Gradient
 //
-
 gradient.stops;
 gradient.radial;
 gradient.clone();
 gradient.equals(gradient);
-
-
 //
 // GradientStop
 //
-
 new paper.GradientStop();
 new paper.GradientStop(color);
 new paper.GradientStop(color, 0);
 gradientStop.offset;
 gradientStop.color;
 gradientStop.clone();
-
-
 //
 // TextItem
 //
-
 textItem.content;
 textItem.fontFamily;
 textItem.fontWeight;
 textItem.fontSize;
 textItem.leading;
 textItem.justification;
-
-
 //
 // PointText
 //
-
 new paper.PointText(point);
 new paper.PointText(object);
 pointText.point;
-
-
 //
 // View
 //
-
 view.autoUpdate;
 view.element;
 view.pixelRatio;
@@ -1035,36 +951,27 @@ view.off('', callback);
 view.off(object);
 view.emit('', event);
 view.responds('');
-
-
 //
 // Event
 //
-
 event.timeStamp;
 event.modifiers;
 event.modifiers.shift;
 event.preventDefault();
 event.stopPropagation();
 event.stop();
-
-
 //
 // MouseEvent
 //
-
 mouseEvent.type;
 mouseEvent.point;
 mouseEvent.target;
 mouseEvent.currentTarget;
 mouseEvent.delta;
 mouseEvent.toString();
-
-
 //
 // Tool
 //
-
 tool.minDistance;
 tool.maxDistance;
 tool.fixedDistance;
@@ -1082,12 +989,9 @@ tool.off('', callback);
 tool.off(object);
 tool.emit('', event);
 tool.responds('');
-
-
 //
 // ToolEvent
 //
-
 toolEvent.type;
 toolEvent.point;
 toolEvent.lastPoint;
@@ -1097,30 +1001,21 @@ toolEvent.delta;
 toolEvent.count;
 toolEvent.item;
 toolEvent.toString();
-
-
 //
 // Key
 //
-
 paper.Key.modifiers;
 paper.Key.isDown('');
-
-
 //
 // KeyEvent
 //
-
 keyEvent.type;
 keyEvent.character;
 keyEvent.key;
 keyEvent.toString();
-
-
 //
 // PaperScope
 //
-
 new paper.PaperScope();
 paperScope.version;
 paperScope.settings;
@@ -1134,7 +1029,7 @@ paperScope.execute('');
 paperScope.execute('', object);
 paperScope.install(object);
 paperScope.setup('');
-paperScope.setup({} as HTMLCanvasElement);
+paperScope.setup({});
 paperScope.setup(size);
 paperScope.activate();
 paper.PaperScope.get(0);
@@ -1163,7 +1058,7 @@ new paperScope.Raster();
 new paperScope.Rectangle(point, size);
 new paperScope.Segment();
 new paperScope.Shape();
-new paperScope.Size(0,0);
+new paperScope.Size(0, 0);
 new paperScope.Style(object);
 new paperScope.SymbolDefinition(item);
 new paperScope.SymbolItem(symbolDefinition);
@@ -1172,12 +1067,9 @@ new paperScope.Tool();
 new paperScope.ToolEvent();
 new paperScope.Tween(object, object, object, 0);
 new paperScope.View();
-
-
 //
 // Global PaperScope instance
 //
-
 paper.version;
 paper.settings;
 paper.project;
@@ -1189,18 +1081,15 @@ paper.execute('');
 paper.execute('', object);
 paper.install(object);
 paper.setup('');
-paper.setup({} as HTMLCanvasElement);
+paper.setup({});
 paper.setup(size);
 paper.activate();
-
-
 //
 // PaperScript
 //
-
 paper.PaperScript.compile('');
 paper.PaperScript.compile('', object);
 paper.PaperScript.execute('', paperScope);
 paper.PaperScript.execute('', paperScope, object);
 paper.PaperScript.load();
-paper.PaperScript.load({} as HTMLScriptElement);
+paper.PaperScript.load({});
