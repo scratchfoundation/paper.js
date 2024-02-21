@@ -9,7 +9,7 @@
  *
  * All rights reserved.
  *
- * Date: Tue Oct 31 13:13:17 2023 -0400
+ * Date: Wed Feb 21 13:03:29 2024 -0800
  *
  * This is an auto-generated type definition.
  */
@@ -3498,16 +3498,6 @@ declare namespace paper {
         constructor(object: object)
 
         /** 
-         * Adds an array of segments (or types that can be converted to segments)
-         * to the end of the {@link #segments} array.
-         * 
-         * @return an array of the added segments. These segments are
-         * not necessarily the same objects, e.g. if the segment to be added already
-         * belongs to another path
-         */
-        addSegments(segments: Segment[]): Segment[]
-
-        /** 
          * Adds one or more segments to the end of the {@link #segments} array of
          * this path.
          * 
@@ -3531,6 +3521,16 @@ declare namespace paper {
          * object, e.g. if the segment to be added already belongs to another path
          */
         insert(index: number, segment: Segment | Point): Segment
+
+        /** 
+         * Adds an array of segments (or types that can be converted to segments)
+         * to the end of the {@link #segments} array.
+         * 
+         * @return an array of the added segments. These segments are
+         * not necessarily the same objects, e.g. if the segment to be added already
+         * belongs to another path
+         */
+        addSegments(segments: Segment[]): Segment[]
 
         /** 
          * Inserts an array of segments at a given index in the path's
@@ -3695,16 +3695,6 @@ declare namespace paper {
         getPointAt(offset: number): Point
 
         /** 
-         * Calculates the normalized tangent vector of the path at the given offset.
-         * 
-         * @param offset - the offset on the path, where `0` is at
-         * the beginning of the path and {@link Path#length} at the end
-         * 
-         * @return the normalized tangent vector at the given offset
-         */
-        getTangentAt(offset: number): Point
-
-        /** 
          * Calculates the normal vector of the path at the given offset.
          * 
          * @param offset - the offset on the path, where `0` is at
@@ -3760,8 +3750,82 @@ declare namespace paper {
          */
         getOffsetsWithTangent(tangent: Point): number[]
 
+        /** 
+         * Calculates the normalized tangent vector of the path at the given offset.
+         * 
+         * @param offset - the offset on the path, where `0` is at
+         * the beginning of the path and {@link Path#length} at the end
+         * 
+         * @return the normalized tangent vector at the given offset
+         */
+        getTangentAt(offset: number): Point
+
     }
     namespace Path {
+
+        class Star extends Path {
+            /** 
+             * Creates a star shaped path item from the properties described by an
+             * object literal.
+             * 
+             * @param object - an object containing properties describing the
+             *     path's attributes
+             */
+            constructor(object: object)
+
+            /** 
+             * Creates a star shaped path item.
+             * 
+             * The largest of `radius1` and `radius2` will be the outer radius of
+             * the star. The smallest of radius1 and radius2 will be the inner
+             * radius.
+             * 
+             * @param center - the center point of the star
+             * @param points - the number of points of the star
+             */
+            constructor(center: Point, points: number, radius1: number, radius2: number)
+
+        }
+
+        class Line extends Path {
+            /** 
+             * Creates a linear path item from two points describing a line.
+             * 
+             * @param from - the line's starting point
+             * @param to - the line's ending point
+             */
+            constructor(from: Point, to: Point)
+
+            /** 
+             * Creates a linear path item from the properties described by an object
+             * literal.
+             * 
+             * @param object - an object containing properties describing the
+             *     path's attributes
+             */
+            constructor(object: object)
+
+        }
+
+        class Circle extends Path {
+            /** 
+             * Creates a circular path item.
+             * 
+             * @param center - the center point of the circle
+             * @param radius - the radius of the circle
+             */
+            constructor(center: Point, radius: number)
+
+            /** 
+             * Creates a circular path item from the properties described by an
+             * object literal.
+             * 
+             * @param object - an object containing properties describing the
+             *     path's attributes
+             */
+            constructor(object: object)
+
+        }
 
         class Rectangle extends Path {
             /** 
@@ -3855,70 +3919,6 @@ declare namespace paper {
             /** 
              * Creates a regular polygon shaped path item from the properties
              * described by an object literal.
-             * 
-             * @param object - an object containing properties describing the
-             *     path's attributes
-             */
-            constructor(object: object)
-
-        }
-
-        class Star extends Path {
-            /** 
-             * Creates a star shaped path item.
-             * 
-             * The largest of `radius1` and `radius2` will be the outer radius of
-             * the star. The smallest of radius1 and radius2 will be the inner
-             * radius.
-             * 
-             * @param center - the center point of the star
-             * @param points - the number of points of the star
-             */
-            constructor(center: Point, points: number, radius1: number, radius2: number)
-
-            /** 
-             * Creates a star shaped path item from the properties described by an
-             * object literal.
-             * 
-             * @param object - an object containing properties describing the
-             *     path's attributes
-             */
-            constructor(object: object)
-
-        }
-
-        class Line extends Path {
-            /** 
-             * Creates a linear path item from two points describing a line.
-             * 
-             * @param from - the line's starting point
-             * @param to - the line's ending point
-             */
-            constructor(from: Point, to: Point)
-
-            /** 
-             * Creates a linear path item from the properties described by an object
-             * literal.
-             * 
-             * @param object - an object containing properties describing the
-             *     path's attributes
-             */
-            constructor(object: object)
-
-        }
-
-        class Circle extends Path {
-            /** 
-             * Creates a circular path item.
-             * 
-             * @param center - the center point of the circle
-             * @param radius - the radius of the circle
-             */
-            constructor(center: Point, radius: number)
-
-            /** 
-             * Creates a circular path item from the properties described by an
-             * object literal.
              * 
              * @param object - an object containing properties describing the
              *     path's attributes
