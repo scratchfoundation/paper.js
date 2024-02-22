@@ -72,7 +72,7 @@
     "gulp-util": "3.0.8",
     "gulp-webserver": "0.9.1",
     "gulp-whitespace": "0.1.0",
-    "gulp-zip": "3.2.0",
+    "gulp-zip": "6.0.0",
     "husky": "2.7.0",
     "jsdom": "15.2.1",
     "jshint": "2.13.6",
