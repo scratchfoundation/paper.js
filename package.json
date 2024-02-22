@@ -81,7 +81,7 @@
     "minimist": "1.2.8",
     "mustache": "3.2.1",
     "prepro": "2.4.0",
-    "qunitjs": "1.23.1",
+    "qunitjs": "2.4.0",
     "require-dir": "1.2.0",
     "resemblejs": "3.2.5",
     "run-sequence": "2.2.1",
