@@ -1,4 +1,6 @@
-# Scratch's fork of Paper.js [![Build Status](https://circleci.com/gh/LLK/paper.js.svg?style=shield)](https://app.circleci.com/pipelines/github/LLK/paper.js?branch=develop) [![NPM](https://img.shields.io/npm/v/@scratch/paper.svg)](https://www.npmjs.com/package/@scratch/paper)
+# Scratch's fork of Paper.js
+
+[![NPM](https://img.shields.io/npm/v/@scratch/paper.svg)](https://www.npmjs.com/package/@scratch/paper)
 
 This is a fork of Paper.js for use in Scratch. Please do not contact the Paper.js authors to support this fork.
 
