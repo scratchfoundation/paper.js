@@ -13,7 +13,7 @@ jobs:
         JVM_OPTS: -Xmx3200m
         JDK_JAVA_OPTIONS: --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.time=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
     steps: 
-        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
         - uses: wagoid/commitlint-github-action@5ce82f5d814d4010519d15f0552aec4f17a1e1fe # v5
         - name: Setup Java
           uses: actions/setup-java@91d3aa4956ec4a53e477c4907347b5e3481be8c9 # v2
