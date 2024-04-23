@@ -43,8 +43,7 @@ jobs:
             npm set progress=false
             which gulp || npm install -g gulp-cli    
         - name: Install NPM Dependencies
-          run: |
-            npm ci --legacy-peer-deps
+          run: npm ci
         - run: gulp jshint
         - run: gulp minify
         - run: gulp test
