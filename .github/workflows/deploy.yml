@@ -36,15 +36,14 @@ jobs:
             EOF
         - name: Setup
           run: |
-            # sudo apt update
-            # sudo apt install libgif-dev
+            sudo apt update
+            sudo apt install pkg-config libcairo2-dev libpango1.0-dev libssl-dev libjpeg62-dev libgif-dev
             TRAVIS_BRANCH="${{github.ref_name}}" travis/setup-git.sh # Configure git user info
             travis/install-assets.sh
             npm set progress=false
             which gulp || npm install -g gulp-cli    
         - name: Install NPM Dependencies
-          run: |
-            npm ci --legacy-peer-deps
+          run: npm ci
         - run: gulp jshint
         - run: gulp minify
         - run: gulp test
