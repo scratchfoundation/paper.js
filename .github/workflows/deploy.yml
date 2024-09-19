@@ -22,7 +22,7 @@ jobs:
             java-version: 17
         - name: Setup submodule
           run: git submodule update --init --recursive
-        - uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2
+        - uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v3
           with:
             cache: "npm"
             node-version-file: ".nvmrc"
