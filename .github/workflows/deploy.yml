@@ -16,7 +16,7 @@ jobs:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         - uses: wagoid/commitlint-github-action@5ce82f5d814d4010519d15f0552aec4f17a1e1fe # v5
         - name: Setup Java
-          uses: actions/setup-java@91d3aa4956ec4a53e477c4907347b5e3481be8c9 # v2
+          uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4
           with:
             distribution: 'temurin'
             java-version: 17
