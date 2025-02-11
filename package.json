@@ -83,7 +83,7 @@
     "prepro": "2.4.0",
     "qunitjs": "1.23.1",
     "require-dir": "1.2.0",
-    "resemblejs": "3.2.5",
+    "resemblejs": "5.0.0",
     "run-sequence": "2.2.1",
     "source-map-support": "0.5.21",
     "stats.js": "0.17.0",
